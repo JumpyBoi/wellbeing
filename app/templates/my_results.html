@@ -91,7 +91,7 @@
                 <p class="response-answer score-text score-{{ response['q' ~ i] if response['q' ~ i] is defined else response.get('q' ~ i) }}"></p> {# Handle potential missing keys gracefully #}
                 {# Or better, using attribute access if passing the object: #}
                 {# <p class="response-answer score-text score-{{ getattr(response, 'q' ~ i) }}"></p> #}
-                <p class="response-answer score-text score-{{ getattr(response, 'q' ~ i, 0) }}"></p> {# Use getattr with default #}
+                <p class="response-answer score-text score-{{ response['q' ~ i] | default(0) }}"></p> {# Use dictionary access with default filter #}
             </div>
             {% endfor %}
 

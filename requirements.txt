@@ -1,4 +1,7 @@
 Flask>=2.0
-Flask-SQLAlchemy>=2.5 # Or latest compatible version
-psycopg2-binary>=2.9 # Revert back to binary version for Vercel build
-python-dotenv>=0.19 # For handling environment variables locally (optional but good practice)
+# Flask-SQLAlchemy>=2.5 # Removed
+# psycopg2-binary>=2.9 # Removed
+python-dotenv>=0.19 # Keep for local credentials/config
+google-api-python-client>=2.0 # Google API Client
+google-auth-httplib2>=0.1
+google-auth-oauthlib>=0.4

@@ -3,70 +3,78 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash, session # Removed g
 import datetime
 import uuid # Import uuid module
-from collections import defaultdict # For easier counting
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import func
+from collections import defaultdict # Need this again
+import statistics # For mean calculation
+# from flask_sqlalchemy import SQLAlchemy # Removed
+# from sqlalchemy.sql import func # Removed
 from dotenv import load_dotenv
 import logging # For better logging
+
+# --- Add Google API Imports ---
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+import json # If loading creds from env var
 
 # Load environment variables from .env file for local development
 load_dotenv()
 
 # --- Configuration ---
-# DATABASE = '../survey.db' # Removed SQLite path
 SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(24)) # Use env var for secret key
 
 app = Flask(__name__)
-# app.config.from_object(__name__) # Remove this if using direct config below
+app.config['SECRET_KEY'] = SECRET_KEY # Set secret key for session
 
-# --- SQLAlchemy Configuration ---
-# Read DATABASE_URL from environment variable (set in Vercel)
-# Fallback to a local SQLite file for development if DATABASE_URL is not set
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_URL', 'sqlite:///local_dev.db') # Use POSTGRES_URL from Vercel/Supabase
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+# --- Google Sheets Configuration ---
+GOOGLE_SHEET_ID = os.environ.get('GOOGLE_SHEET_ID', '1IG32jiibAN4fkQy-NZXkfYdiMf7Wm5l9KtxLpm1WEOk') # Your Sheet ID
+# Using file path for local dev, Vercel needs env var method (see comments below)
+GOOGLE_CREDS_PATH = os.environ.get('GOOGLE_CREDS_PATH', 'c:/Users/Daniel/Downloads/gen-lang-client-0485926854-208026995971.json')
+# For Vercel Deployment: Store the *entire content* of the JSON key file in an environment variable named GOOGLE_CREDS_JSON
+GOOGLE_CREDS_JSON_STR = os.environ.get('GOOGLE_CREDS_JSON')
+SHEET_NAME = os.environ.get('SHEET_NAME', 'Sheet1') # Assumes data goes to 'Sheet1'
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-# --- Database Model ---
-class Response(db.Model):
-    __tablename__ = 'responses' # Optional: Define table name explicitly
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    response_uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4())) # Use default function for UUID
-    q1 = db.Column(db.Integer, nullable=True) # Allow nulls if needed
-    q2 = db.Column(db.Integer, nullable=True)
-    q3 = db.Column(db.Integer, nullable=True)
-    q4 = db.Column(db.Integer, nullable=True)
-    q5 = db.Column(db.Integer, nullable=True)
-    q6 = db.Column(db.Integer, nullable=True)
-    q7 = db.Column(db.Integer, nullable=True)
-    q8 = db.Column(db.Integer, nullable=True)
-    q9 = db.Column(db.Integer, nullable=True)
-    q10 = db.Column(db.Integer, nullable=True)
-    q11 = db.Column(db.Integer, nullable=True)
-    q12 = db.Column(db.Integer, nullable=True)
-    custom_q1 = db.Column(db.Text, nullable=True)
-    custom_q2 = db.Column(db.Text, nullable=True)
+# --- Google Sheets Helper ---
+def get_sheets_service():
+    """Authenticates and returns the Google Sheets service object."""
+    creds = None
+    # Method 1: From environment variable (Preferred for Vercel)
+    if GOOGLE_CREDS_JSON_STR:
+        try:
+            creds_info = json.loads(GOOGLE_CREDS_JSON_STR)
+            creds = service_account.Credentials.from_service_account_info(
+                creds_info, scopes=SCOPES)
+            print("Authenticated using service account JSON from environment variable.")
+        except Exception as e:
+            print(f"Error loading credentials from environment variable: {e}")
+            logging.exception("Cred env var loading error")
+            return None
+    # Method 2: From file path (primarily for local dev)
+    elif GOOGLE_CREDS_PATH and os.path.exists(GOOGLE_CREDS_PATH):
+        try:
+            creds = service_account.Credentials.from_service_account_file(
+                GOOGLE_CREDS_PATH, scopes=SCOPES)
+            print("Authenticated using service account file.")
+        except Exception as e:
+            print(f"Error loading credentials from file {GOOGLE_CREDS_PATH}: {e}")
+            logging.exception("Cred file loading error")
+            return None
+    else:
+        # If neither path nor env var is found/valid
+        print("Google credentials not found (checked GOOGLE_CREDS_PATH and GOOGLE_CREDS_JSON env var). Cannot authenticate.")
+        return None
 
-    def __repr__(self):
-        return f'<Response {self.response_uuid}>'
+    if not creds:
+         return None
 
-# --- New CLI command to create tables ---
-@app.cli.command('create-db')
-def create_db_command():
-    """Creates the database tables based on SQLAlchemy models."""
     try:
-        # In a production/Vercel context, you might run this once manually
-        # or use a migration tool like Alembic.
-        # db.drop_all() # Optional: Drop existing tables first if needed
-        with app.app_context(): # Ensure context for db operations
-             db.create_all()
-        print('Initialized the database tables.')
+        service = build('sheets', 'v4', credentials=creds)
+        return service
     except Exception as e:
-        print(f"Error creating database tables: {e}")
-        logging.exception("Database creation failed")
+        print(f"Error building Google Sheets service: {e}")
+        logging.exception("Sheets service build error")
+        return None
 
-# --- Remove SQLite Specific Code ---
-# Removed get_db, close_db, init_db, initdb_command, before_request
+# --- Removed Database Models and Config ---
 
 # --- (SQLite code removed) ---
 
@@ -81,7 +89,7 @@ def survey_form():
 def submit_survey():
     """Handles survey submission."""
     try:
-        # db = get_db() # Removed SQLite db access
+        # Removed DB access
         # --- Extract data from form ---
         # Likert scale questions (ensure they are integers 1-5)
         q_scores = {}
@@ -100,29 +108,39 @@ def submit_survey():
         custom_q1 = request.form.get('custom_q1', '').strip()
         custom_q2 = request.form.get('custom_q2', '').strip()
 
-        # --- Insert into database using SQLAlchemy ---
-        new_response = Response(
-            # response_uuid is generated by default
-            q1=q_scores.get('q1'), q2=q_scores.get('q2'), q3=q_scores.get('q3'),
-            q4=q_scores.get('q4'), q5=q_scores.get('q5'), q6=q_scores.get('q6'),
-            q7=q_scores.get('q7'), q8=q_scores.get('q8'), q9=q_scores.get('q9'),
-            q10=q_scores.get('q10'), q11=q_scores.get('q11'), q12=q_scores.get('q12'),
-            custom_q1=custom_q1,
-            custom_q2=custom_q2
-        )
-        db.session.add(new_response)
-        db.session.flush() # Flush to get the generated UUID before commit (optional but useful)
-        response_uuid = new_response.response_uuid # Get the generated UUID
-        db.session.commit() # Commit the transaction
+        # --- Append data to Google Sheet ---
+        service = get_sheets_service()
+        if not service:
+            raise Exception("Could not authenticate with Google Sheets API.")
+
+        # Prepare the row data in the correct order for your sheet columns
+        # IMPORTANT: Ensure this order matches your Google Sheet header row exactly!
+        # Example Order: Timestamp, UUID, Q1-12, CustomQ1, CustomQ2
+        timestamp = datetime.datetime.now().isoformat()
+        response_uuid = str(uuid.uuid4()) # Generate UUID here
+        row_data = [timestamp, response_uuid] + [q_scores.get(f'q{i}', None) for i in range(1, 13)] + [custom_q1, custom_q2]
+
+        body = {
+            'values': [row_data]
+        }
+        # Append the row to the sheet
+        result = service.spreadsheets().values().append(
+            spreadsheetId=GOOGLE_SHEET_ID,
+            range=f"{SHEET_NAME}!A1", # Append after the last row in the sheet
+            valueInputOption='USER_ENTERED', # Interpret input as if user typed it
+            insertDataOption='INSERT_ROWS', # Insert new rows for the data
+            body=body
+        ).execute()
+        print(f"Appended data to sheet: {result.get('updates').get('updatedRange')}")
 
         # Store the UUID in the session to link to the thank you page
-        session['last_response_uuid'] = response_uuid
-
+        session['last_response_uuid'] = response_uuid # Store UUID again for my-results link
         flash('Thank you for completing the survey!', 'success')
         return redirect(url_for('thank_you')) # Redirect to a thank you page
 
     except Exception as e:
-        print(f"Error processing submission: {e}") # Log the error
+        print(f"Error processing submission or writing to sheet: {e}") # Log the error
+        logging.exception("Submission/Sheet write error") # Log full traceback
         flash('An error occurred while submitting your survey. Please try again.', 'error')
         return redirect(url_for('survey_form')) # Redirect back to survey on error
 
@@ -130,19 +148,22 @@ def submit_survey():
 def thank_you():
     """Displays the styled thank you page."""
     # Get the last response UUID from the session, if it exists
+    # last_response_uuid = session.get('last_response_uuid') # No longer needed
+    # session.pop('last_response_uuid', None) # No longer needed
+    # Pass UUID to thank you page again so the link works
     last_response_uuid = session.get('last_response_uuid')
-    # Clear it from session immediately after retrieving to prevent reuse
-    session.pop('last_response_uuid', None)
+    session.pop('last_response_uuid', None) # Clear after retrieving
     return render_template('thank_you.html', response_uuid=last_response_uuid)
 
+# --- Dashboard and Results Routes (Using Google Sheets) ---
 
 @app.route('/dashboard')
 def dashboard():
-    """Displays the dashboard page."""
+    """Displays the dashboard page (data fetched via JS)."""
     # Add authentication/authorization check here later
     return render_template('dashboard.html')
 
-# Helper function to calculate distribution
+# Helper function to calculate distribution (keep this)
 def calculate_distribution(scores):
     """Calculates the distribution counts for a list of scores."""
     counts = {'engaged': 0, 'not_engaged': 0, 'actively_disengaged': 0}
@@ -159,7 +180,7 @@ def calculate_distribution(scores):
             counts['actively_disengaged'] += 1
     return counts, len(valid_scores)
 
-# Define question texts
+# Define question texts (keep this)
 QUESTION_TEXTS = {
     "Q1": {"short": "Know What's Expected", "full": "I know what is expected of me at work."},
     "Q2": {"short": "Materials and Equipment", "full": "I have the materials and equipment I need to do my work right."},
@@ -175,118 +196,188 @@ QUESTION_TEXTS = {
     "Q12": {"short": "Learn and Grow", "full": "In the last year, I have had opportunities at work to learn and grow."},
 }
 
-
 @app.route('/dashboard/data')
 def dashboard_data():
-    """Provides data for the new dashboard format."""
+    """Provides data for the new dashboard format by reading from Google Sheets."""
     # Add authentication/authorization check here later
     try:
-        # db = get_db() # Removed SQLite
-        # cursor = db.cursor() # Removed SQLite
+        service = get_sheets_service()
+        if not service:
+            raise Exception("Could not authenticate with Google Sheets API.")
 
-        # Fetch all responses using SQLAlchemy
-        all_responses = Response.query.all() # List of Response objects
+        # Read data from the sheet (assuming headers are in row 1)
+        # Adjust range if your data starts elsewhere or sheet name is different
+        read_range = f"{SHEET_NAME}!A2:P" # Read Timestamp to CustomQ2, starting row 2
+        result = service.spreadsheets().values().get(
+            spreadsheetId=GOOGLE_SHEET_ID,
+            range=read_range
+        ).execute()
+        values = result.get('values', [])
 
-        num_responses = len(all_responses)
+        if not values:
+            # Return empty/default data if sheet is empty
+            return jsonify({
+                "grand_mean": 0, "total_responses": 0,
+                "engagement_distribution": {"engaged_percent": 0, "not_engaged_percent": 0, "actively_disengaged_percent": 0},
+                "questions": [], "custom_q1_responses": [], "custom_q2_responses": []
+            })
+
+        num_responses = len(values)
         grand_total_score = 0
         grand_valid_count = 0
         overall_distribution_counts = {'engaged': 0, 'not_engaged': 0, 'actively_disengaged': 0}
         questions_data = []
+        all_scores_by_q = defaultdict(list) # Store all scores for each question
+        custom_q1_responses = []
+        custom_q2_responses = []
 
-        if num_responses > 0:
+        # Define column indices based on assumed sheet structure
+        # Timestamp=0, UUID=1, Q1=2, Q2=3, ..., Q12=13, CustomQ1=14, CustomQ2=15
+        q_start_index = 2
+        custom_q1_index = 14
+        custom_q2_index = 15
+
+        for row in values:
+            # Extract scores, converting to int, handling errors/empty cells
             for i in range(1, 13):
                 q_key = f"q{i}"
-                # Extract scores for this specific question, handling potential None from DB
-                # Extract scores using attribute access on Response objects
-                scores_for_q = [getattr(resp, q_key) for resp in all_responses if getattr(resp, q_key) is not None]
+                col_index = q_start_index + i - 1
+                try:
+                    # Check if index exists and value is not empty before converting
+                    if col_index < len(row) and row[col_index]:
+                         score = int(row[col_index])
+                         if 1 <= score <= 5:
+                             all_scores_by_q[q_key].append(score)
+                         else:
+                             all_scores_by_q[q_key].append(None) # Mark invalid scores as None
+                    else:
+                         all_scores_by_q[q_key].append(None) # Mark empty cells as None
+                except (ValueError, TypeError):
+                    all_scores_by_q[q_key].append(None) # Mark conversion errors as None
 
-                # Calculate average (only considering valid 1-5 scores)
-                valid_scores_for_q = [s for s in scores_for_q if 1 <= s <= 5]
-                num_respondents_for_q = len(valid_scores_for_q)
-                average_for_q = round(sum(valid_scores_for_q) / num_respondents_for_q, 2) if num_respondents_for_q > 0 else 0
+            # Extract custom responses
+            try:
+                if custom_q1_index < len(row) and row[custom_q1_index]:
+                    custom_q1_responses.append(row[custom_q1_index])
+                if custom_q2_index < len(row) and row[custom_q2_index]:
+                    custom_q2_responses.append(row[custom_q2_index])
+            except IndexError:
+                 pass # Ignore if row is too short for custom questions
 
-                # Calculate distribution for this question
-                dist_counts, _ = calculate_distribution(scores_for_q) # Use the helper
+        # --- Calculate aggregates ---
+        for i in range(1, 13):
+            q_key = f"q{i}"
+            scores_for_q = all_scores_by_q[q_key]
+            valid_scores_for_q = [s for s in scores_for_q if s is not None] # Already filtered for 1-5 during collection
 
-                # Add to grand total for Grand Mean calculation
-                grand_total_score += sum(valid_scores_for_q)
-                grand_valid_count += num_respondents_for_q
+            num_respondents_for_q = len(valid_scores_for_q)
+            # Use statistics.mean, handle empty list case
+            average_for_q = round(statistics.mean(valid_scores_for_q), 2) if num_respondents_for_q > 0 else 0
 
-                # Add to overall distribution counts
-                overall_distribution_counts['engaged'] += dist_counts['engaged']
-                overall_distribution_counts['not_engaged'] += dist_counts['not_engaged']
-                overall_distribution_counts['actively_disengaged'] += dist_counts['actively_disengaged']
+            dist_counts, _ = calculate_distribution(scores_for_q) # Use helper
 
-                questions_data.append({
-                    "id": q_key.upper(),
-                    "text": QUESTION_TEXTS[q_key.upper()]["full"],
-                    "short_text": QUESTION_TEXTS[q_key.upper()]["short"],
-                    "average": average_for_q,
-                    "respondents": num_respondents_for_q,
-                    # "percentile_rank": 0, # Removed placeholder
-                    "distribution": dist_counts # Counts: engaged, not_engaged, actively_disengaged
-                })
+            grand_total_score += sum(valid_scores_for_q)
+            grand_valid_count += num_respondents_for_q
 
-        # Calculate Grand Mean
+            overall_distribution_counts['engaged'] += dist_counts['engaged']
+            overall_distribution_counts['not_engaged'] += dist_counts['not_engaged']
+            overall_distribution_counts['actively_disengaged'] += dist_counts['actively_disengaged']
+
+            questions_data.append({
+                "id": q_key.upper(),
+                "text": QUESTION_TEXTS[q_key.upper()]["full"],
+                "short_text": QUESTION_TEXTS[q_key.upper()]["short"],
+                "average": average_for_q,
+                "respondents": num_respondents_for_q,
+                "distribution": dist_counts
+            })
+
+        # Calculate Grand Mean & Overall Distribution % (same logic as before)
         grand_mean = round(grand_total_score / grand_valid_count, 2) if grand_valid_count > 0 else 0
-
-        # Calculate Overall Distribution Percentages
         total_overall_scores_counted = sum(overall_distribution_counts.values())
         engagement_distribution_percent = {
             "engaged_percent": round((overall_distribution_counts['engaged'] / total_overall_scores_counted) * 100) if total_overall_scores_counted > 0 else 0,
             "not_engaged_percent": round((overall_distribution_counts['not_engaged'] / total_overall_scores_counted) * 100) if total_overall_scores_counted > 0 else 0,
             "actively_disengaged_percent": round((overall_distribution_counts['actively_disengaged'] / total_overall_scores_counted) * 100) if total_overall_scores_counted > 0 else 0,
         }
-        # Adjust rounding to ensure sum is 100% (optional but good practice)
-        # Simple adjustment: add difference to largest category if needed
         current_total_percent = sum(engagement_distribution_percent.values())
         if total_overall_scores_counted > 0 and current_total_percent != 100:
              diff = 100 - current_total_percent
-             # Find the category with the max percentage to add the difference
              max_cat = max(engagement_distribution_percent, key=engagement_distribution_percent.get)
              engagement_distribution_percent[max_cat] += diff
 
-
-        # Get custom question responses using SQLAlchemy
-        custom_q1_results = db.session.query(Response.custom_q1).filter(Response.custom_q1 != None, Response.custom_q1 != '').all()
-        custom_q1_responses = [res[0] for res in custom_q1_results]
-        custom_q2_results = db.session.query(Response.custom_q2).filter(Response.custom_q2 != None, Response.custom_q2 != '').all()
-        custom_q2_responses = [res[0] for res in custom_q2_results]
-
         data = {
             "grand_mean": grand_mean,
-            "total_responses": num_responses, # Total submissions started
-            "engagement_distribution": engagement_distribution_percent, # Overall percentages
-            "questions": questions_data, # List of dicts per question
-            # Keeping custom responses in case they are needed later
+            "total_responses": num_responses,
+            "engagement_distribution": engagement_distribution_percent,
+            "questions": questions_data,
             "custom_q1_responses": custom_q1_responses,
             "custom_q2_responses": custom_q2_responses
         }
         return jsonify(data)
 
     except Exception as e:
-        print(f"Error fetching dashboard data: {e}")
-        # Log the full traceback for debugging
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": "Could not retrieve dashboard data"}), 500
-# --- Route for viewing individual results ---
-@app.route('/my-results/<string:response_uuid>') # Specify type for route variable
-def my_results(response_uuid):
-    """Displays the responses for a specific submission."""
-    # db = get_db() # Removed SQLite
-    # cursor = db.cursor() # Removed SQLite
-    # cursor.execute("SELECT * FROM responses WHERE response_uuid = ?", (response_uuid,)) # Removed SQLite
-    # response_data = cursor.fetchone() # Removed SQLite
-    response_data = Response.query.filter_by(response_uuid=response_uuid).first() # Use SQLAlchemy
+        print(f"Error fetching/processing dashboard data from sheet: {e}")
+        logging.exception("Dashboard data error")
+        return jsonify({"error": "Could not retrieve or process dashboard data"}), 500
 
-    if response_data:
-        # Convert the Row object to a dictionary for easier template access
-        # response_dict = dict(response_data) # Pass the object directly
-        return render_template('my_results.html', response=response_data) # Pass the SQLAlchemy object
-    else:
-        # Handle case where UUID is not found or invalid
-        flash('Could not find the specified survey response.', 'error')
-        return redirect(url_for('survey_form')) # Or redirect to thank_you or an error page
+
+@app.route('/my-results/<string:response_uuid>')
+def my_results(response_uuid):
+    """Displays the responses for a specific submission by reading from Google Sheets."""
+    try:
+        service = get_sheets_service()
+        if not service:
+            raise Exception("Could not authenticate with Google Sheets API.")
+
+        # Read data - assuming UUID is in the second column (index 1)
+        read_range = f"{SHEET_NAME}!A2:P" # Read Timestamp to CustomQ2
+        result = service.spreadsheets().values().get(
+            spreadsheetId=GOOGLE_SHEET_ID,
+            range=read_range
+        ).execute()
+        values = result.get('values', [])
+
+        response_data = None
+        if values:
+            # Find the row matching the UUID
+            for row in values:
+                 # Check if row is long enough and UUID matches
+                if len(row) > 1 and row[1] == response_uuid:
+                    # Convert row list to a dictionary-like object for the template
+                    # Assuming order: Timestamp, UUID, Q1-12, CustomQ1, CustomQ2
+                    # Use .get(index, None) for safety if rows might be short/ragged
+                    response_data = {
+                        'timestamp': row[0] if len(row) > 0 else None,
+                        'response_uuid': row[1],
+                        'q1': int(row[2]) if len(row) > 2 and row[2] else None,
+                        'q2': int(row[3]) if len(row) > 3 and row[3] else None,
+                        'q3': int(row[4]) if len(row) > 4 and row[4] else None,
+                        'q4': int(row[5]) if len(row) > 5 and row[5] else None,
+                        'q5': int(row[6]) if len(row) > 6 and row[6] else None,
+                        'q6': int(row[7]) if len(row) > 7 and row[7] else None,
+                        'q7': int(row[8]) if len(row) > 8 and row[8] else None,
+                        'q8': int(row[9]) if len(row) > 9 and row[9] else None,
+                        'q9': int(row[10]) if len(row) > 10 and row[10] else None,
+                        'q10': int(row[11]) if len(row) > 11 and row[11] else None,
+                        'q11': int(row[12]) if len(row) > 12 and row[12] else None,
+                        'q12': int(row[13]) if len(row) > 13 and row[13] else None,
+                        'custom_q1': row[14] if len(row) > 14 else None,
+                        'custom_q2': row[15] if len(row) > 15 else None,
+                    }
+                    break # Stop searching once found
+
+        if response_data:
+            # Need to pass the dictionary here, not the SQLAlchemy object
+            return render_template('my_results.html', response=response_data)
+        else:
+            flash('Could not find the specified survey response.', 'error')
+            return redirect(url_for('survey_form'))
+
+    except Exception as e:
+        print(f"Error fetching specific response {response_uuid} from sheet: {e}")
+        logging.exception("My results error")
+        flash('An error occurred while retrieving your responses.', 'error')
+        return redirect(url_for('survey_form'))
 
 # --- (Main execution block removed) ---
