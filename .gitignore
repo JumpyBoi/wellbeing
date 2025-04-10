@@ -5,6 +5,7 @@ __pycache__/
 
 # Database file
 survey.db
+local_dev.db
 
 # OS generated files
 .DS_Store
