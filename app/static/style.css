@@ -1,0 +1,576 @@
+/* Import Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/* NCOSS Color Variables */
+:root {
+    --ncoss-bright-green: #78C043;
+    --ncoss-grey: #515A72;
+    --ncoss-dark-green: #285D50;
+    --ncoss-pop-blue: #00A8BF;
+    --ncoss-pop-yellow: #FFB92A;
+    --ncoss-pop-salmon: #E4A2BE; /* Note: Style guide says E4A2BE, image selection looks more orange/yellow like pop-yellow */
+
+    /* Tints (Examples - calculate specific values if needed) */
+    --ncoss-grey-tint-80: rgba(81, 90, 114, 0.8);
+    --ncoss-grey-tint-20: rgba(81, 90, 114, 0.2);
+    --ncoss-bright-green-tint-20: rgba(120, 192, 67, 0.2);
+    --ncoss-pop-yellow-tint-80: rgba(255, 185, 42, 0.8);
+    --ncoss-pop-yellow-tint-20: rgba(255, 185, 42, 0.2);
+
+    /* Other */
+    --background-light-grey: #f8f9fa; /* Light grey for option background */
+    --border-grey: #dee2e6; /* Light border */
+    --text-dark: #212529; /* Dark text for readability */
+    --text-light: #ffffff;
+}
+
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400; /* Regular */
+    margin: 0;
+    padding: 2em;
+    background-color: var(--text-light);
+    color: var(--ncoss-grey);
+    /* display: flex; */ /* Remove flex for dashboard layout */
+    /* flex-direction: column; */
+    /* align-items: center; */
+    /* min-height: 100vh; */
+}
+
+/* Adjust body padding for dashboard specifically if needed */
+body.dashboard-body { /* Add class to body in dashboard.html if needed */
+     padding: 0; /* Remove default padding for full width elements */
+     background-color: var(--background-light-grey); /* Light grey background overall */
+}
+
+
+.survey-container {
+    width: 100%;
+    max-width: 700px; /* Adjust as needed */
+    margin: auto;
+}
+
+h1, h2, h3 {
+    font-weight: 600; /* Semibold */
+    color: var(--ncoss-dark-green);
+    text-align: center;
+}
+
+p {
+    color: var(--ncoss-grey);
+    font-weight: 400; /* Regular */
+    line-height: 1.6;
+}
+
+strong, b {
+     font-weight: 600; /* Semibold */
+}
+
+/* Progress Bar */
+.progress-container {
+    width: 100%;
+    margin-bottom: 2em;
+}
+
+.progress-info {
+    font-size: 0.9em;
+    color: var(--ncoss-grey);
+    margin-bottom: 0.5em;
+    font-weight: 600; /* Semibold */
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background-color: var(--ncoss-grey-tint-20);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fg {
+    height: 100%;
+    width: 0%; /* Updated by JS */
+    background-color: var(--ncoss-bright-green);
+    border-radius: 4px;
+    transition: width 0.3s ease-in-out;
+}
+
+/* Survey Question Styling */
+.survey-question {
+    display: none; /* Hidden by default, shown by JS */
+    width: 100%;
+    margin-bottom: 3em;
+    text-align: center;
+}
+
+.survey-question.active {
+    display: block;
+}
+
+.question-number {
+    font-size: 1em;
+    color: var(--ncoss-grey-tint-80);
+    margin-bottom: 0.25em;
+    font-weight: 400; /* Regular */
+}
+
+.question-text {
+    font-size: 1.5em; /* Larger question text */
+    font-weight: 600; /* Semibold */
+    color: var(--text-dark);
+    margin-bottom: 1.5em;
+}
+
+/* Emoji/Likert Options */
+.options-container {
+    display: flex;
+    justify-content: space-around; /* Distribute space */
+    gap: 0.5em; /* Reduce gap slightly */
+    flex-wrap: nowrap; /* Prevent wrapping */
+    margin-bottom: 2em;
+}
+
+.option-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5em 1em; /* More padding */
+    background-color: var(--background-light-grey);
+    border: 2px solid var(--border-grey);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    min-width: 100px; /* Ensure options have some width */
+    text-align: center;
+    position: relative; /* For checkmark */
+}
+
+.option-label:hover {
+    border-color: var(--ncoss-grey-tint-80);
+    background-color: #f1f3f5; /* Slightly darker hover */
+}
+
+.option-label input[type="radio"] {
+    display: none; /* Hide the actual radio button */
+}
+
+/* Style for selected option */
+.option-label input[type="radio"]:checked + .option-content {
+   /* Handled by JS adding a class for more complex styling like the image */
+}
+
+.option-label.selected {
+    border-color: var(--ncoss-pop-yellow); /* Use Pop Yellow for selection border */
+    background-color: var(--ncoss-pop-yellow-tint-20); /* Light yellow background */
+    box-shadow: 0 0 10px var(--ncoss-pop-yellow-tint-80);
+}
+
+/* Checkmark for selected option */
+.option-label.selected::after {
+    content: '✔';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: var(--ncoss-pop-yellow);
+    color: var(--text-light);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+
+.option-emoji {
+    font-size: 2.5em; /* Larger emoji */
+    margin-bottom: 0.5em;
+}
+
+.option-text {
+    font-size: 0.9em;
+    font-weight: 400; /* Regular */
+    color: var(--ncoss-grey);
+}
+
+/* Text Area for Custom Questions */
+textarea {
+    width: 100%; /* Full width */
+    min-height: 100px;
+    margin-top: 0.5em;
+    padding: 0.8em;
+    border: 1px solid var(--border-grey);
+    border-radius: 5px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding in width */
+    color: var(--ncoss-grey);
+}
+
+textarea:focus {
+    border-color: var(--ncoss-pop-blue);
+    outline: none;
+    box-shadow: 0 0 5px var(--ncoss-pop-blue);
+}
+
+
+/* Navigation Buttons */
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 2em;
+}
+
+.nav-button {
+    padding: 0.8em 2em;
+    border-radius: 8px;
+    font-weight: 600; /* Semibold */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 1em;
+}
+
+.nav-button#prev-btn {
+    background-color: var(--text-light);
+    color: var(--ncoss-grey);
+    border: 1px solid var(--border-grey);
+}
+
+.nav-button#prev-btn:hover {
+    background-color: var(--background-light-grey);
+}
+
+.nav-button#next-btn,
+.nav-button#submit-btn {
+    background-color: var(--ncoss-grey); /* Use Primary Grey for Continue/Submit */
+    color: var(--text-light);
+    border: none;
+}
+
+.nav-button#next-btn:hover,
+.nav-button#submit-btn:hover {
+    background-color: var(--text-dark); /* Darken grey on hover */
+}
+
+.nav-button:disabled {
+    background-color: var(--ncoss-grey-tint-20);
+    cursor: not-allowed;
+    color: var(--ncoss-grey-tint-80);
+    border: 1px solid var(--ncoss-grey-tint-20);
+}
+
+/* Hide Previous button on first question, Hide Next on last */
+.nav-button#prev-btn.hidden,
+.nav-button#next-btn.hidden,
+.nav-button#submit-btn.hidden {
+    display: none;
+}
+
+
+/* --- NEW DASHBOARD STYLES --- */
+
+.dashboard-container {
+    width: 100%;
+    max-width: 1200px; /* Wider container for dashboard */
+    margin: 2em auto;
+    padding: 1em;
+    background-color: #fff; /* White background for dashboard area */
+    box-sizing: border-box;
+}
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-grey);
+    padding-bottom: 1em;
+    margin-bottom: 1.5em;
+}
+.header-logo { /* Placeholder */
+    width: 50px; height: 50px; background-color: var(--ncoss-grey-tint-20);
+    margin-right: 1em; border-radius: 4px;
+    /* Add NCOSS logo image here if available */
+}
+.header-title {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: var(--ncoss-grey);
+    text-align: left; /* Override general h1 center */
+    margin: 0;
+}
+.header-subtitle {
+    font-size: 0.9em;
+    color: var(--ncoss-grey-tint-80);
+    margin: 0.2em 0;
+}
+.dashboard-main {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* Adjust ratio if needed */
+    gap: 2em;
+}
+.dashboard-sidebar {
+    padding: 1.5em;
+    background-color: var(--background-light-grey);
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--border-grey);
+}
+.sidebar-title {
+    font-weight: 600;
+    color: var(--ncoss-grey);
+    margin-bottom: 1.5em;
+    font-size: 1.1em;
+    text-align: center; /* Override general h3 center */
+}
+/* Engagement Index Section */
+.engagement-index {
+    margin-bottom: 2em;
+    border-bottom: 1px solid var(--border-grey);
+    padding-bottom: 1.5em;
+}
+.engagement-index h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--ncoss-grey);
+    margin-bottom: 1em;
+    text-align: left; /* Override general h3 center */
+}
+.engagement-legend {
+    display: flex;
+    gap: 1.5em;
+    margin-bottom: 0.5em;
+    font-size: 0.9em;
+}
+.legend-item { display: flex; align-items: center; gap: 0.5em; }
+.legend-color { width: 15px; height: 15px; }
+.legend-engaged { background-color: var(--ncoss-bright-green); }
+.legend-not-engaged { background-color: var(--ncoss-grey-tint-80); }
+.legend-disengaged { background-color: var(--text-dark); }
+
+.engagement-bar-container {
+    width: 100%; height: 25px; background-color: var(--ncoss-grey-tint-20);
+    display: flex; border-radius: 4px; overflow: hidden; margin-bottom: 0.5em;
+}
+.engagement-bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 0.8em; font-weight: 600; transition: width 0.5s ease-in-out; }
+.bar-engaged { background-color: var(--ncoss-bright-green); }
+.bar-not-engaged { background-color: var(--ncoss-grey-tint-80); color: var(--text-dark); }
+.bar-disengaged { background-color: var(--text-dark); }
+
+/* Grand Mean Section */
+.grand-mean-container {
+    /* Placeholder for circular gauge - requires JS library or complex CSS */
+    width: 150px; height: 150px; border: 10px solid var(--ncoss-grey-tint-20);
+    /* border-top-color: var(--ncoss-pop-yellow); Example - JS should set this based on value */
+    border-radius: 50%; margin: 0 auto 1em auto;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; /* For potential JS gauge */
+}
+.grand-mean-value { font-size: 2em; font-weight: 600; color: var(--ncoss-grey); }
+.grand-mean-label { font-size: 0.8em; color: var(--ncoss-grey-tint-80); text-transform: uppercase; }
+
+/* Results Table */
+.results-table { width: 100%; border-collapse: collapse; }
+.results-table th, .results-table td { padding: 0.8em 0.5em; text-align: left; border-bottom: 1px solid var(--border-grey); vertical-align: top; }
+.results-table thead th { font-weight: 600; color: var(--ncoss-grey); font-size: 0.9em; text-transform: uppercase; border-bottom-width: 2px; }
+.results-table tbody tr:hover { background-color: var(--background-light-grey); }
+
+.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1.1em; padding-right: 0.5em; width: 5%; } /* Give ID a small width */
+.q-text-container { display: flex; align-items: flex-start; width: 50%; } /* Give text more width */
+.q-color-bar { width: 5px; min-height: 30px; margin-right: 0.8em; background-color: var(--ncoss-pop-yellow); /* Default color */ border-radius: 2px; flex-shrink: 0; }
+/* TODO: Add specific colors for q-color-bar based on question or score? */
+.q-short-text { font-weight: 600; color: var(--text-dark); display: block; margin-bottom: 0.2em; }
+.q-full-text { font-size: 0.85em; color: var(--ncoss-grey-tint-80); }
+
+.q-score-col { width: 15%; text-align: right; } /* Column for score + respondents */
+.q-score { font-weight: 600; font-size: 1.1em; color: var(--text-dark); }
+.q-respondents { font-size: 0.8em; color: var(--ncoss-grey-tint-80); padding-left: 0.2em; }
+
+.q-percentile-col { width: 30%; text-align: right; } /* Column for percentile + bar */
+.q-percentile { font-weight: 600; display: inline-block; width: 30px; text-align: right; margin-right: 1em;} /* Placeholder */
+.q-percentile-bar-container { display: inline-block; width: 100px; height: 15px; background-color: var(--ncoss-grey-tint-20); border-radius: 3px; overflow: hidden; vertical-align: middle; }
+.q-percentile-bar { height: 100%; background-color: var(--ncoss-pop-yellow); /* Default */ transition: width 0.5s ease-in-out; }
+/* TODO: Add color logic for percentile bar based on rank */
+.q-percentile-bar.rank-low { background-color: #dc3545; } /* Example Red */
+.q-percentile-bar.rank-mid { background-color: var(--ncoss-pop-yellow); } /* Example Yellow */
+.q-percentile-bar.rank-high { background-color: var(--ncoss-bright-green); } /* Example Green */
+
+
+/* Custom Responses Section (Optional) */
+.custom-responses-section { grid-column: 1 / -1; /* Span both columns */ margin-top: 2em; }
+
+
+/* --- END NEW DASHBOARD STYLES --- */
+
+
+/* Dashboard Specific Styles (Existing - Remove/Merge if redundant) */
+/* .chart-container { ... } */ /* Remove if not used */
+
+.response-list { /* Keep for custom responses */
+    margin-top: 2em;
+    border: 1px solid var(--border-grey);
+    padding: 1.5em;
+    border-radius: 8px;
+    background-color: var(--text-light);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.response-list h3 {
+    margin-top: 0;
+    color: var(--ncoss-dark-green);
+    border-bottom: 1px solid var(--ncoss-bright-green);
+    padding-bottom: 0.5em;
+    margin-bottom: 1em;
+    text-align: left; /* Override general h3 center */
+}
+
+.response-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.response-list li {
+    background-color: var(--background-light-grey);
+    border: 1px solid var(--border-grey);
+    padding: 0.8em 1em;
+    margin-bottom: 0.8em;
+    border-radius: 5px;
+    color: var(--ncoss-grey);
+}
+
+/* #engagementScore { ... } */ /* Remove if not used */
+
+
+/* Flash Messages (Keep) */
+.flash-messages {
+    list-style: none;
+    padding: 0;
+    margin: 1em 0;
+    text-align: center;
+}
+.flash-messages li {
+    padding: 0.8em 1.5em;
+    margin-bottom: 1em;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.flash-messages .success {
+    background-color: var(--ncoss-bright-green-tint-20);
+    color: var(--ncoss-dark-green);
+    border: 1px solid var(--ncoss-bright-green);
+}
+.flash-messages .error {
+    background-color: rgba(228, 162, 142, 0.2); /* Salmon tint */
+    color: #a04f6d; /* Darker salmon/red */
+    border: 1px solid var(--ncoss-pop-salmon);
+}
+
+/* Styles for my_results page (Keep) */
+.results-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 2em auto;
+    padding: 2em;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.results-container h1 {
+    color: var(--ncoss-dark-green);
+    margin-bottom: 1em;
+    text-align: left;
+}
+.response-item {
+    margin-bottom: 1.5em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid var(--border-grey);
+}
+.response-item:last-child {
+    border-bottom: none;
+}
+.response-question {
+    font-weight: 600; /* Semibold */
+    color: var(--ncoss-grey);
+    margin-bottom: 0.5em;
+}
+.response-answer {
+    font-weight: 400; /* Regular */
+    color: var(--text-dark);
+    padding-left: 1em;
+    white-space: pre-wrap; /* Preserve formatting for text areas */
+}
+.response-answer.score-1,
+.response-answer.score-2 {
+     color: #dc3545; /* Reddish for low scores */
+}
+ .response-answer.score-3 {
+     color: #ffc107; /* Yellowish for neutral */
+ }
+ .response-answer.score-4,
+ .response-answer.score-5 {
+     color: #28a745; /* Greenish for high scores */
+ }
+ .score-text::before { content: "Invalid Score"; }
+ .score-text.score-1::before { content: "1 - Strongly Disagree"; }
+ .score-text.score-2::before { content: "2 - Disagree"; }
+ .score-text.score-3::before { content: "3 - Neutral"; }
+ .score-text.score-4::before { content: "4 - Agree"; }
+ .score-text.score-5::before { content: "5 - Strongly Agree"; }
+
+/* Styles for thank_you page (Keep) */
+body.thank-you-page {
+    background-color: var(--ncoss-grey); /* Dark background like image */
+    color: var(--text-light);
+    justify-content: center; /* Center content vertically */
+    text-align: center;
+    display: flex; /* Re-add flex for centering */
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2em; /* Re-add padding */
+}
+.thank-you-container {
+    max-width: 600px;
+    padding: 3em;
+}
+.thank-you-graphic {
+    height: 150px;
+    margin-bottom: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    color: rgba(255, 255, 255, 0.3);
+}
+ .thank-you-graphic img {
+     max-height: 100%;
+     max-width: 80%;
+ }
+.thank-you-heading {
+    font-size: 2.5em;
+    font-weight: 600; /* Semibold */
+    color: var(--text-light);
+    margin-bottom: 0.5em;
+}
+.thank-you-subtext {
+    font-size: 1.1em;
+    font-weight: 400; /* Regular */
+    color: rgba(255, 255, 255, 0.8); /* Slightly transparent white */
+    margin-bottom: 2em;
+}
+.thank-you-button {
+    display: inline-block;
+    padding: 0.8em 2em;
+    border-radius: 8px;
+    font-weight: 600; /* Semibold */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 1em;
+    background-color: var(--ncoss-pop-blue); /* Pop Blue for button */
+    color: var(--text-light);
+    text-decoration: none;
+    border: none;
+}
+.thank-you-button:hover {
+    background-color: #008a9e; /* Darker Pop Blue */
+}

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engagement Survey Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Dashboard specific styles moved to style.css -->
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" class="header-logo">
+            <div>
+                <h1 class="header-title">Your Company Engagement Survey | Overall</h1>
+                <p class="header-subtitle">Percentile Range in Gallup Database: <span style="color: red;">■ <33</span> | <span style="color: orange;">■ 33-66</span> | <span style="color: green;">■ >66</span></p>
+                <p class="header-subtitle"><small>* Item data not shown if sample size is less than 4. Workgroup data not shown to protect confidentiality.</small></p>
+            </div>
+        </header>
+
+        <main class="dashboard-main">
+            <section class="dashboard-content">
+                <!-- Engagement Index -->
+                <div class="engagement-index">
+                    <h3>ENGAGEMENT INDEX</h3>
+                    <div class="engagement-legend">
+                        <span class="legend-item"><span class="legend-color legend-engaged"></span> Engaged</span>
+                        <span class="legend-item"><span class="legend-color legend-not-engaged"></span> Not Engaged</span>
+                        <span class="legend-item"><span class="legend-color legend-disengaged"></span> Actively Disengaged</span>
+                    </div>
+                    <!-- Placeholder: Add Engagement Index Ratio if calculated -->
+                    <div class="engagement-bar-container" id="engagement-bar">
+                        <div class="engagement-bar-segment bar-engaged" id="bar-engaged" style="width: 0%;"><span></span></div>
+                        <div class="engagement-bar-segment bar-not-engaged" id="bar-not-engaged" style="width: 0%;"><span></span></div>
+                        <div class="engagement-bar-segment bar-disengaged" id="bar-disengaged" style="width: 0%;"><span></span></div>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <table class="results-table" id="results-table">
+                    <thead>
+                        <tr>
+                            <th colspan="2"></th>
+                            <th>Score (Respondents)</th>
+                            <!-- Removed Percentile Rank Header -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be populated by JavaScript -->
+                        <tr><td colspan="3">Loading data...</td></tr>
+                    </tbody>
+                </table>
+
+                 <!-- Custom Responses (Optional) -->
+                 <div class="custom-responses-section response-list">
+                    <h3>What we do well:</h3>
+                    <ul id="customQ1Responses">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+                <div class="custom-responses-section response-list">
+                    <h3>What we could improve:</h3>
+                    <ul id="customQ2Responses">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <aside class="dashboard-sidebar">
+                <h4 class="sidebar-title">YOUR COMPANY</h4>
+                <div class="grand-mean-container" id="grand-mean-gauge">
+                    <!-- Circular gauge would ideally be rendered here by JS -->
+                    <span class="grand-mean-value" id="grand-mean-value">--</span>
+                    <span class="grand-mean-label">GRANDMEAN</span>
+                </div>
+                <!-- Could add more sidebar content here -->
+            </aside>
+        </main>
+
+    </div><!-- End .dashboard-container -->
+
+    <!-- JavaScript to fetch data and render dashboard -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/dashboard/data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                         throw new Error(`Server error: ${data.error}`);
+                    }
+                    console.log("Dashboard Data:", data); // Log data for debugging
+
+                    // --- Populate Engagement Index Bar ---
+                    const dist = data.engagement_distribution;
+                    const engagedBar = document.getElementById('bar-engaged');
+                    const notEngagedBar = document.getElementById('bar-not-engaged');
+                    const disengagedBar = document.getElementById('bar-disengaged');
+
+                    if (engagedBar && notEngagedBar && disengagedBar) {
+                        engagedBar.style.width = `${dist.engaged_percent}%`;
+                        engagedBar.querySelector('span').textContent = `${dist.engaged_percent}%`;
+                        notEngagedBar.style.width = `${dist.not_engaged_percent}%`;
+                        notEngagedBar.querySelector('span').textContent = `${dist.not_engaged_percent}%`;
+                        disengagedBar.style.width = `${dist.actively_disengaged_percent}%`;
+                        disengagedBar.querySelector('span').textContent = `${dist.actively_disengaged_percent}%`;
+
+                        // Hide text if percentage is too small (e.g., < 5%)
+                        [engagedBar, notEngagedBar, disengagedBar].forEach(bar => {
+                            const span = bar.querySelector('span');
+                            if (parseInt(bar.style.width) < 5) {
+                                span.style.display = 'none';
+                            } else {
+                                 span.style.display = 'inline';
+                            }
+                        });
+                    }
+
+
+                    // --- Populate Grand Mean ---
+                    const grandMeanValue = document.getElementById('grand-mean-value');
+                    const grandMeanGauge = document.getElementById('grand-mean-gauge'); // For potential gauge styling
+                    if (grandMeanValue) {
+                        grandMeanValue.textContent = data.grand_mean.toFixed(2);
+                        // TODO: Add JS logic to update border-top-color or a gauge library based on value
+                        // Example: Set border color based on score
+                         let meanColor = 'var(--ncoss-pop-yellow)'; // Default mid
+                         if (data.grand_mean >= 4.0) meanColor = 'var(--ncoss-bright-green)';
+                         else if (data.grand_mean < 3.0) meanColor = '#dc3545'; // Red
+                         if(grandMeanGauge) grandMeanGauge.style.borderTopColor = meanColor;
+
+                    }
+
+                    // --- Populate Results Table ---
+                    const tableBody = document.querySelector('#results-table tbody');
+                    if (tableBody) {
+                        tableBody.innerHTML = ''; // Clear loading row
+
+                        if (data.questions && data.questions.length > 0) {
+                            data.questions.forEach(q => {
+                                const row = tableBody.insertRow();
+
+                                // Q ID Cell
+                                const cellId = row.insertCell();
+                                cellId.className = 'q-id';
+                                cellId.textContent = q.id;
+
+                                // Question Text Cell
+                                const cellText = row.insertCell();
+                                cellText.className = 'q-text-container';
+                                // Determine color bar color (example logic)
+                                let colorBarColor = 'var(--ncoss-pop-yellow)'; // Default mid
+                                if (q.average >= 4.0) colorBarColor = 'var(--ncoss-bright-green)';
+                                else if (q.average < 3.0) colorBarColor = '#dc3545'; // Red
+
+                                cellText.innerHTML = `
+                                    <div class="q-color-bar" style="background-color: ${colorBarColor};"></div>
+                                    <div>
+                                        <span class="q-short-text">${q.short_text}</span>
+                                        <span class="q-full-text">${q.text}</span>
+                                    </div>
+                                `;
+
+                                // Score Cell
+                                const cellScore = row.insertCell();
+                                cellScore.className = 'q-score-col';
+                                cellScore.innerHTML = `
+                                    <span class="q-score">${q.average.toFixed(2)}</span>
+                                    <span class="q-respondents">(${q.respondents})</span>
+                                `;
+
+                                // Removed Percentile Cell creation
+                            });
+                        } else {
+                            tableBody.innerHTML = '<tr><td colspan="3">No response data available.</td></tr>';
+                        }
+                    }
+
+                    // --- Populate Custom Responses (Copied from previous version) ---
+                     function populateList(listId, responses) {
+                        const listElement = document.getElementById(listId);
+                        if (!listElement) return; // Check if element exists
+                        listElement.innerHTML = ''; // Clear loading/previous content
+                        if (responses && responses.length > 0) {
+                            responses.forEach(response => {
+                                const li = document.createElement('li');
+                                li.textContent = response; // Basic sanitization
+                                listElement.appendChild(li);
+                            });
+                        } else {
+                            const li = document.createElement('li');
+                            li.textContent = "No responses submitted yet.";
+                            li.style.fontStyle = 'italic';
+                            listElement.appendChild(li);
+                        }
+                    }
+                    populateList('customQ1Responses', data.custom_q1_responses);
+                    populateList('customQ2Responses', data.custom_q2_responses);
+
+                })
+                .catch(error => {
+                    console.error('Error fetching or processing dashboard data:', error);
+                    // Display user-friendly error message on the page
+                    const tableBody = document.querySelector('#results-table tbody');
+                     if (tableBody) {
+                         tableBody.innerHTML = '<tr><td colspan="3">Error loading dashboard data. Please try again later.</td></tr>';
+                     }
+                     // Clear other fields too
+                     const grandMeanValue = document.getElementById('grand-mean-value');
+                     if(grandMeanValue) grandMeanValue.textContent = "Error";
+                     const engagementBar = document.getElementById('engagement-bar');
+                     if(engagementBar) engagementBar.innerHTML = '<div style="padding: 5px; color: red;">Error loading data</div>';
+
+                });
+        });
+    </script>
+
+</body>
+</html>

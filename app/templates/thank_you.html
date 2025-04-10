@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Specific styles for thank you page */
+        body.thank-you-page {
+            background-color: var(--ncoss-grey); /* Dark background like image */
+            color: var(--text-light);
+            justify-content: center; /* Center content vertically */
+            text-align: center;
+        }
+        .thank-you-container {
+            max-width: 600px;
+            padding: 3em;
+        }
+        .thank-you-graphic {
+            /* Placeholder for graphic - could be an img tag or CSS shapes */
+            height: 150px;
+            margin-bottom: 2em;
+            /* Basic placeholder styling */
+            /* background-color: rgba(255, 255, 255, 0.1); */
+            /* border-radius: 10px; */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: rgba(255, 255, 255, 0.3);
+        }
+         .thank-you-graphic img { /* Style if using an image */
+             max-height: 100%;
+             max-width: 80%;
+         }
+        .thank-you-heading {
+            font-size: 2.5em;
+            font-weight: 600; /* Semibold */
+            color: var(--text-light);
+            margin-bottom: 0.5em;
+        }
+        .thank-you-subtext {
+            font-size: 1.1em;
+            font-weight: 400; /* Regular */
+            color: rgba(255, 255, 255, 0.8); /* Slightly transparent white */
+            margin-bottom: 2em;
+        }
+        .thank-you-button {
+            display: inline-block;
+            padding: 0.8em 2em;
+            border-radius: 8px;
+            font-weight: 600; /* Semibold */
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 1em;
+            background-color: var(--ncoss-pop-blue); /* Pop Blue for button */
+            color: var(--text-light);
+            text-decoration: none;
+            border: none;
+        }
+        .thank-you-button:hover {
+            background-color: #008a9e; /* Darker Pop Blue */
+        }
+    </style>
+</head>
+<body class="thank-you-page">
+    <div class="thank-you-container">
+        <div class="thank-you-graphic">
+            <!-- Placeholder: Add an <img> tag here if you have a graphic file -->
+            <!-- Graphic Placeholder -->
+        </div>
+        <h1 class="thank-you-heading">Thank you for participating<br>in our Employee Wellbeing Survey!</h1>
+        <p class="thank-you-subtext">We look forward to sharing the results with you soon.</p>
+        {% if response_uuid %}
+            <a href="{{ url_for('my_results', response_uuid=response_uuid) }}" class="thank-you-button">View My Responses</a>
+        {% else %}
+            <!-- Optionally show a different message or button if UUID is missing -->
+             <p class="thank-you-subtext">(Could not retrieve your specific responses link.)</p>
+             <a href="{{ url_for('dashboard') }}" class="thank-you-button">View Aggregate Dashboard</a>
+        {% endif %}
+    </div>
+</body>
+</html>

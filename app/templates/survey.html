@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Wellbeing Survey</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="survey-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-info" id="progress-info">Question 1 of 14</div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fg" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <form id="surveyForm" action="{{ url_for('submit_survey') }}" method="post">
+            <!-- Hidden input to track current question index for potential server-side validation if needed -->
+            <input type="hidden" id="currentQuestionIndex" name="currentQuestionIndex" value="0">
+
+            <!-- Questions Container -->
+            <div id="questions-wrapper">
+
+                <!-- Question 1 -->
+                <div class="survey-question active" data-question-index="0">
+                    <p class="question-number">Question 1</p>
+                    <p class="question-text">I know what is expected of me at work.</p>
+                    <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="survey-question" data-question-index="1">
+                    <p class="question-number">Question 2</p>
+                    <p class="question-text">I have the materials and equipment I need to do my work right.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                 <div class="survey-question" data-question-index="2">
+                    <p class="question-number">Question 3</p>
+                    <p class="question-text">At work, I have the opportunity to do what I do best every day.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                 <div class="survey-question" data-question-index="3">
+                    <p class="question-number">Question 4</p>
+                    <p class="question-text">In the last seven days, I have received recognition or praise for doing good work.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                 <div class="survey-question" data-question-index="4">
+                    <p class="question-number">Question 5</p>
+                    <p class="question-text">My supervisor, or someone at work, seems to care about me as a person.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 6 -->
+                 <div class="survey-question" data-question-index="5">
+                    <p class="question-number">Question 6</p>
+                    <p class="question-text">There is someone at work who encourages my development.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q6" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q6" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q6" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q6" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q6" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 7 -->
+                 <div class="survey-question" data-question-index="6">
+                    <p class="question-number">Question 7</p>
+                    <p class="question-text">At work, my opinions seem to count.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q7" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q7" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q7" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q7" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q7" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 8 -->
+                 <div class="survey-question" data-question-index="7">
+                    <p class="question-number">Question 8</p>
+                    <p class="question-text">The mission or purpose of my company makes me feel my job is important.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q8" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q8" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q8" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q8" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q8" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 9 -->
+                 <div class="survey-question" data-question-index="8">
+                    <p class="question-number">Question 9</p>
+                    <p class="question-text">My associates or fellow employees are committed to doing quality work.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q9" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q9" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q9" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q9" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q9" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 10 -->
+                 <div class="survey-question" data-question-index="9">
+                    <p class="question-number">Question 10</p>
+                    <p class="question-text">I have a best friend at work.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q10" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q10" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q10" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q10" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q10" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 11 -->
+                 <div class="survey-question" data-question-index="10">
+                    <p class="question-number">Question 11</p>
+                    <p class="question-text">In the last six months, someone at work has talked to me about my progress.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q11" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q11" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q11" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q11" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q11" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 12 -->
+                 <div class="survey-question" data-question-index="11">
+                    <p class="question-number">Question 12</p>
+                    <p class="question-text">In the last year, I have had opportunities at work to learn and grow.</p>
+                     <div class="options-container">
+                        <label class="option-label">
+                            <input type="radio" name="q12" value="1" required>
+                            <div class="option-content">
+                                <span class="option-emoji">😞</span>
+                                <span class="option-text">Strongly Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q12" value="2">
+                             <div class="option-content">
+                                <span class="option-emoji">😕</span>
+                                <span class="option-text">Disagree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q12" value="3">
+                             <div class="option-content">
+                                <span class="option-emoji">😐</span>
+                                <span class="option-text">Neutral</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q12" value="4">
+                             <div class="option-content">
+                                <span class="option-emoji">😊</span>
+                                <span class="option-text">Agree</span>
+                            </div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q12" value="5">
+                             <div class="option-content">
+                                <span class="option-emoji">😄</span>
+                                <span class="option-text">Strongly Agree</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Custom Question 1 -->
+                <div class="survey-question" data-question-index="12">
+                    <p class="question-number">Question 13</p>
+                    <label for="custom_q1" class="question-text">What is one thing our team or company does really well?</label>
+                    <textarea id="custom_q1" name="custom_q1" rows="4" required></textarea>
+                </div>
+
+                <!-- Custom Question 2 -->
+                <div class="survey-question" data-question-index="13">
+                    <p class="question-number">Question 14</p>
+                    <label for="custom_q2" class="question-text">What is one thing our team or company could improve?</label>
+                    <textarea id="custom_q2" name="custom_q2" rows="4" required></textarea>
+                </div>
+
+            </div> <!-- End #questions-wrapper -->
+
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <button type="button" id="prev-btn" class="nav-button hidden">Previous</button>
+                <button type="button" id="next-btn" class="nav-button">Continue</button>
+                <button type="submit" id="submit-btn" class="nav-button hidden">Submit Survey</button>
+            </div>
+
+        </form>
+    </div><!-- End .survey-container -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const questions = document.querySelectorAll('.survey-question');
+            const progressBar = document.getElementById('progress-bar');
+            const progressInfo = document.getElementById('progress-info');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const questionsWrapper = document.getElementById('questions-wrapper');
+            const form = document.getElementById('surveyForm');
+            const currentQuestionIndexInput = document.getElementById('currentQuestionIndex'); // Hidden input
+
+            let currentQuestionIndex = 0;
+            const totalQuestions = questions.length;
+
+            function updateProgress() {
+                const currentQuestionNumber = currentQuestionIndex + 1;
+                const progressPercentage = (currentQuestionNumber / totalQuestions) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+                progressInfo.textContent = `Question ${currentQuestionNumber} of ${totalQuestions}`;
+                currentQuestionIndexInput.value = currentQuestionIndex; // Update hidden input
+            }
+
+            function isQuestionAnswered(index) {
+                const questionDiv = questions[index];
+                if (!questionDiv) return false;
+
+                const radioInputs = questionDiv.querySelectorAll('input[type="radio"]');
+                const textareaInputs = questionDiv.querySelectorAll('textarea');
+
+                if (radioInputs.length > 0) {
+                    // Check if any radio button in this group is checked
+                    return Array.from(radioInputs).some(input => input.checked);
+                } else if (textareaInputs.length > 0) {
+                    // Check if the textarea has some non-whitespace content
+                    return Array.from(textareaInputs).some(textarea => textarea.value.trim() !== '');
+                }
+                return false; // Should not happen if questions are structured correctly
+            }
+
+             function updateButtonStates() {
+                const isAnswered = isQuestionAnswered(currentQuestionIndex);
+
+                // Previous button visibility
+                prevBtn.classList.toggle('hidden', currentQuestionIndex === 0);
+
+                // Next/Submit button visibility and state
+                if (currentQuestionIndex === totalQuestions - 1) {
+                    // Last question
+                    nextBtn.classList.add('hidden');
+                    submitBtn.classList.remove('hidden');
+                    submitBtn.disabled = !isAnswered;
+                } else {
+                    // Not the last question
+                    nextBtn.classList.remove('hidden');
+                    submitBtn.classList.add('hidden');
+                    nextBtn.disabled = !isAnswered;
+                }
+            }
+
+
+            function showQuestion(index) {
+                questions.forEach((question, i) => {
+                    question.classList.toggle('active', i === index);
+                });
+                currentQuestionIndex = index;
+                updateProgress();
+                updateButtonStates();
+                 // Scroll to top of question smoothly (optional)
+                questions[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // Event Listeners
+            nextBtn.addEventListener('click', () => {
+                if (isQuestionAnswered(currentQuestionIndex) && currentQuestionIndex < totalQuestions - 1) {
+                    showQuestion(currentQuestionIndex + 1);
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentQuestionIndex > 0) {
+                    showQuestion(currentQuestionIndex - 1);
+                }
+            });
+
+             // Handle radio button changes and textarea inputs for enabling next/submit
+            questionsWrapper.addEventListener('change', (event) => {
+                if (event.target.type === 'radio') {
+                    // Remove 'selected' from all labels in the current question
+                    const currentQuestionDiv = questions[currentQuestionIndex];
+                    currentQuestionDiv.querySelectorAll('.option-label').forEach(label => {
+                        label.classList.remove('selected');
+                    });
+                    // Add 'selected' to the parent label of the checked radio
+                    if (event.target.checked) {
+                        event.target.closest('.option-label').classList.add('selected');
+                    }
+                    updateButtonStates();
+                }
+            });
+             questionsWrapper.addEventListener('input', (event) => {
+                 if (event.target.tagName === 'TEXTAREA') {
+                     updateButtonStates();
+                 }
+             });
+
+            // Prevent accidental form submission with Enter key
+             form.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA') {
+                    event.preventDefault();
+                    // Optionally, trigger the next/submit button if enabled
+                    if (currentQuestionIndex === totalQuestions - 1) {
+                        if (!submitBtn.disabled) submitBtn.click();
+                    } else {
+                         if (!nextBtn.disabled) nextBtn.click();
+                    }
+                }
+             });
+
+
+            // Initial setup
+            showQuestion(0);
+        });
+    </script>
+
+</body>
+</html>
