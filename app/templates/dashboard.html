@@ -92,20 +92,15 @@
             </div>
 
             <div class="dashboard-card question-list">
-                 <h3>QUESTION LIST</h3>
-                 <table class="results-table" id="results-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Question</th>
-                            <th>Score (Resp.)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Rows will be populated by JavaScript -->
-                        <tr><td colspan="3">Loading data...</td></tr>
-                    </tbody>
-                </table>
+                <div class="question-list-header">
+                    <h3 class="question-list-title">QUESTIONS</h3>
+                    <div class="question-list-score-header">
+                        SCORE<br>(RESPONDENTS)
+                    </div>
+                </div>
+                <div class="question-list-content" id="question-list-content">
+                    <div class="loading-placeholder">Loading data...</div>
+                </div>
             </div>
 
              <!-- Bottom Row - Custom Questions -->
@@ -205,67 +200,70 @@
                 }
 
 
-                // --- Populate Results Table ---
-                const tableBody = document.querySelector('#results-table tbody');
-                if (tableBody) {
-                    tableBody.innerHTML = ''; // Clear previous rows
+                // --- Populate Question List (New Div Structure) ---
+                const questionListContent = document.getElementById('question-list-content');
+                if (questionListContent) {
+                    questionListContent.innerHTML = ''; // Clear previous content or loading indicator
 
                     if (yearData.questions && yearData.questions.length > 0) {
-                        yearData.questions.forEach(q => {
-                            const row = tableBody.insertRow();
+                         // Sort questions by ID
+                         const sortedQuestions = [...yearData.questions].sort((a, b) => a.id - b.id);
 
-                            // Q ID Cell (with category dot)
-                            const cellIdContainer = row.insertCell();
-                            cellIdContainer.className = 'q-id-container';
-                            // Create dot
-                            const dot = document.createElement('span');
-                            dot.className = `q-category-dot category-${q.category || 'unknown'}`; // Add category class
-                            cellIdContainer.appendChild(dot);
-                            // Create ID span
-                            const idSpan = document.createElement('span');
-                            idSpan.className = 'q-id';
-                            idSpan.textContent = q.id; // Use integer ID
-                            cellIdContainer.appendChild(idSpan);
-                            // Question Text Cell
-                            const cellText = row.insertCell();
-                            cellText.className = 'q-text-container';
-                            // Removed color bar logic
+                        sortedQuestions.forEach(q => {
+                            // --- Helper functions ---
+                            const getScoreColorClass = (score) => {
+                                if (score === undefined) return 'score-color-nodata';
+                                if (score >= 4.0) return 'score-high'; // Use existing classes
+                                if (score >= 3.0) return 'score-mid';  // Use existing classes
+                                return 'score-low'; // Use existing classes
+                            };
 
-                            // Calculate score percentage (assuming max score is 5)
-                            const scorePercent = q.score !== undefined ? (q.score / 5) * 100 : 0;
-                            const categoryClass = `category-${q.category || 'unknown'}`;
+                            const getCategoryClass = (category) => {
+                                // Map backend category keys to CSS classes if needed, or use directly
+                                return `category-${category || 'unknown'}`;
+                            };
 
-                            // Restructure innerHTML for better layout control
-                            cellText.innerHTML = `
-                                <div class="question-cell-content">
-                                    <span class="q-short-text">${q.question}</span>
-                                    <span class="q-full-text">${q.description}</span>
-                                    <div class="q-score-bar-container">
-                                        <div class="q-score-bar ${categoryClass}" style="width: ${scorePercent}%;"></div>
+                            const getBarWidth = (score) => {
+                                 if (score === undefined) return '0%';
+                                 return `${(score / 5) * 100}%`; // Assuming max score is 5
+                            };
+                            // --- End Helper Functions ---
+
+                            const questionRow = document.createElement('div');
+                            questionRow.className = 'question-row';
+
+                            const scoreValue = q.score !== undefined ? q.score.toFixed(2) : '--';
+                            const respondentsValue = q.respondents !== undefined ? q.respondents : 0;
+                            const categoryClass = getCategoryClass(q.category);
+                            const scoreColorClass = getScoreColorClass(q.score);
+                            const barWidth = getBarWidth(q.score);
+
+                            // Construct the inner HTML using the new div structure
+                            questionRow.innerHTML = `
+                                <div class="question-id-col">
+                                    <div class="question-id-text">Q${q.id}</div>
+                                    <div class="category-dot ${categoryClass}"></div>
+                                </div>
+                                <div class="question-main-col">
+                                    <div class="question-text">${q.question}</div>
+                                    <div class="question-description">${q.description || ''}</div>
+                                    <div class="score-bar-container">
+                                        <div class="score-bar ${categoryClass}" style="width: ${barWidth};"></div>
                                     </div>
                                 </div>
+                                <div class="question-score-col">
+                                    <div class="score-value ${scoreColorClass}">${scoreValue}</div>
+                                    <div class="respondents-count">(${respondentsValue})</div>
+                                </div>
                             `;
-
-                            // Score Cell
-                            const cellScore = row.insertCell();
-                            cellScore.className = 'q-score-col';
-                            // Determine score class
-                            let scoreClass = 'score-mid'; // Default
-                            if (q.score >= 4.0) scoreClass = 'score-high';
-                            else if (q.score < 3.0) scoreClass = 'score-low';
-
-                            cellScore.innerHTML = `
-                                <span class="q-score ${scoreClass}">${q.score !== undefined ? q.score.toFixed(2) : '--'}</span>
-                                <span class="q-respondents">(${q.respondents !== undefined ? q.respondents : 0})</span>
-                            `;
+                            questionListContent.appendChild(questionRow);
                         });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="3">No response data available for this year.</td></tr>';
+                        questionListContent.innerHTML = '<div class="no-data-message">No response data available for this year.</div>';
                     }
                 } else {
-                     console.warn("Results table body not found.");
+                    console.warn("Question list content container not found.");
                 }
-
                 // --- Populate Custom Responses ---
                  function populateList(listId, responses) {
                     const listElement = document.getElementById(listId);
@@ -298,8 +296,8 @@
                  document.getElementById('score-individual').textContent = '--';
                  document.getElementById('score-teamwork').textContent = '--';
                  document.getElementById('score-growth').textContent = '--';
-                 const tableBody = document.querySelector('#results-table tbody');
-                 if (tableBody) tableBody.innerHTML = '<tr><td colspan="3">Select a year to view data.</td></tr>';
+                 const qListContent = document.getElementById('question-list-content');
+                 if (qListContent) qListContent.innerHTML = '<div class="loading-placeholder">Select a year to view data.</div>';
                  const q1List = document.getElementById('customQ1Responses');
                  if (q1List) q1List.innerHTML = '<li>Select a year.</li>';
                  const q2List = document.getElementById('customQ2Responses');
@@ -357,9 +355,9 @@
                     console.error('Error fetching or processing dashboard data:', error);
                     // Display user-friendly error message
                     clearDashboard(); // Clear display areas
-                    const tableBody = document.querySelector('#results-table tbody');
-                     if (tableBody) {
-                         tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Error loading dashboard data: ${error.message}. Please try again later.</td></tr>`;
+                    const qListContent = document.getElementById('question-list-content');
+                     if (qListContent) {
+                         qListContent.innerHTML = `<div class="no-data-message" style="color: red;">Error loading dashboard data: ${error.message}. Please try again later.</div>`;
                      }
                      yearSelector.innerHTML = '<option value="">Error</option>';
                 });
