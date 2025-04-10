@@ -369,11 +369,19 @@ textarea:focus {
 }
 .category-pyramid {
     grid-column: 1 / 2; grid-row: 2 / 3;
-    display: flex; /* Enable flexbox for centering */
+    display: flex;
     flex-direction: column; /* Stack title and pyramid */
-    /* align-items: center; */ /* Center horizontally if needed */
-    justify-content: center; /* Center vertically */
-    min-height: 300px; /* Give card height for centering to work */
+    min-height: 300px; /* Ensure card has height */
+    /* justify-content: center; */ /* REMOVE - Don't center title */
+}
+/* Make pyramid container take remaining space and center its content */
+.category-pyramid .pyramid-container {
+    flex-grow: 1; /* Allow container to grow */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center pyramid horizontally */
+    justify-content: center; /* Center pyramid vertically */
+    margin-top: 1em; /* Keep margin from title */
 }
 .question-list { grid-column: 2 / 3; grid-row: 2 / 3; }
 .custom-q1 { grid-column: 1 / 2; grid-row: 3 / 4; }
@@ -427,9 +435,9 @@ textarea:focus {
 .question-list .results-table { width: 100%; border-collapse: collapse; margin-top: -0.5em; /* Adjust spacing */ }
 .question-list .results-table th,
 .question-list .results-table td {
-    padding: 0.8em 0.5em; /* Increase padding slightly */
+    padding: 1em 0.5em; /* Increase vertical padding */
     text-align: left;
-    border-bottom: 1px solid var(--border-grey);
+    border-bottom: 1px solid var(--border-grey); /* This creates the dividing line */
     vertical-align: top; /* Align content to the top */
 }
 /* Specific alignment for headers */
@@ -440,23 +448,24 @@ textarea:focus {
 .results-table thead th { font-weight: 600; color: var(--ncoss-grey); font-size: 0.9em; text-transform: uppercase; border-bottom-width: 2px; }
 .results-table tbody tr:hover { background-color: var(--background-light-grey); }
 
-/* Ensure ID container aligns dot and number horizontally and centers in its column */
-.q-id-container { display: flex; align-items: center; gap: 0.5em; justify-content: center; /* Center content */ height: 100%; /* Try to match cell height */ }
-.q-category-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1em; line-height: 1; /* Prevent extra space */ }
-/* Ensure text container takes available space and stacks content */
-.q-text-container { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; /* Center content vertically */ height: 100%; }
+/* Align ID container content to the top */
+.q-id-container { display: flex; align-items: flex-start; /* Align to top */ gap: 0.5em; justify-content: center; padding-top: 0.1em; /* Align slightly with short text */ }
+.q-category-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 0.3em; /* Align dot with text baseline */ }
+.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1em; line-height: 1.2; /* Adjust line height */ }
+/* Adjust text container */
+.q-text-container { display: block; /* Let content stack naturally */ }
 /* Remove .q-color-bar style */
 /* .q-color-bar { ... } */
-.q-short-text { font-weight: 600; color: var(--text-dark); display: block; margin-bottom: 0.2em; }
-.q-full-text { font-size: 0.85em; color: var(--ncoss-grey-tint-80); margin-bottom: 0.5em; /* Space before bar */ }
+/* Style question text elements */
+.q-short-text { font-weight: 600; color: var(--text-dark); display: block; margin-bottom: 0.3em; font-size: 1em; line-height: 1.2; }
+.q-full-text { font-size: 0.9em; color: var(--ncoss-grey); display: block; margin-bottom: 0.6em; /* Space before bar */ }
 
 /* Styles for the score progress bar */
 .q-score-bar-container {
-    width: 100%;
-    height: 8px;
+    width: 95%; /* Make slightly less than full width */
+    height: 10px; /* Slightly thicker */
     background-color: var(--ncoss-grey-tint-20);
-    border-radius: 4px;
+    border-radius: 5px; /* Match height */
     overflow: hidden;
 }
 .q-score-bar {

@@ -215,10 +215,11 @@
                             const scorePercent = q.score !== undefined ? (q.score / 5) * 100 : 0;
                             const categoryClass = `category-${q.category || 'unknown'}`;
 
+                            // Restructure innerHTML for better layout control
                             cellText.innerHTML = `
-                                <div>
-                                    <span class="q-short-text">${q.question}</span> <!-- Use 'question' field -->
-                                    <span class="q-full-text">${q.description}</span> <!-- Use 'description' field -->
+                                <div class="question-cell-content">
+                                    <span class="q-short-text">${q.question}</span>
+                                    <span class="q-full-text">${q.description}</span>
                                     <div class="q-score-bar-container">
                                         <div class="q-score-bar ${categoryClass}" style="width: ${scorePercent}%;"></div>
                                     </div>
