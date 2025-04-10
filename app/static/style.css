@@ -360,6 +360,13 @@ textarea:focus {
 /* Specific Card Layout Adjustments */
 .engagement-index { grid-column: 1 / 2; grid-row: 1 / 2; }
 .overall-score { grid-column: 2 / 3; grid-row: 1 / 2; }
+/* Adjust grid columns - give question list slightly more space */
+.dashboard-grid {
+    display: grid;
+    /* grid-template-columns: repeat(2, 1fr); */ /* Two equal columns */
+    grid-template-columns: 1fr 1.2fr; /* Give right column slightly more space */
+    gap: 1.5em; /* Gap between cards */
+}
 .category-pyramid { grid-column: 1 / 2; grid-row: 2 / 3; }
 .question-list { grid-column: 2 / 3; grid-row: 2 / 3; }
 .custom-q1 { grid-column: 1 / 2; grid-row: 3 / 4; }
@@ -416,15 +423,41 @@ textarea:focus {
 .results-table thead th { font-weight: 600; color: var(--ncoss-grey); font-size: 0.9em; text-transform: uppercase; border-bottom-width: 2px; }
 .results-table tbody tr:hover { background-color: var(--background-light-grey); }
 
-.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1em; padding-right: 0.5em; width: 5%; text-align: center; }
-.q-text-container { display: flex; align-items: center; width: 65%; } /* Give text more width, align center */
-.q-color-bar { width: 5px; height: 25px; /* Adjust height */ margin-right: 0.8em; background-color: var(--ncoss-pop-yellow); border-radius: 2px; flex-shrink: 0; }
-/* TODO: Add specific colors for q-color-bar based on question or score? */
+.q-id-container { display: flex; align-items: center; gap: 0.5em; width: 5%; justify-content: center; padding-left: 5px; /* Add padding for dot */ } /* Container for ID and dot */
+.q-category-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; } /* Style for the category dot */
+.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1em; }
+.q-text-container { display: flex; flex-direction: column; /* Stack text and bar */ align-items: flex-start; width: 65%; } /* Give text more width */
+/* Remove .q-color-bar style */
+/* .q-color-bar { ... } */
 .q-short-text { font-weight: 600; color: var(--text-dark); display: block; margin-bottom: 0.2em; }
-.q-full-text { font-size: 0.85em; color: var(--ncoss-grey-tint-80); }
+.q-full-text { font-size: 0.85em; color: var(--ncoss-grey-tint-80); margin-bottom: 0.5em; /* Space before bar */ }
+
+/* Styles for the score progress bar */
+.q-score-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--ncoss-grey-tint-20);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.q-score-bar {
+    height: 100%;
+    background-color: var(--ncoss-grey); /* Default color */
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+}
+/* Use category colors for the bar */
+.q-score-bar.category-basic-needs { background-color: var(--pyramid-color-basic); }
+.q-score-bar.category-individual { background-color: var(--pyramid-color-individual); }
+.q-score-bar.category-teamwork { background-color: var(--pyramid-color-teamwork); }
+.q-score-bar.category-growth { background-color: var(--pyramid-color-growth); }
 
 .q-score-col { width: 30%; text-align: right; } /* Give score col more width */
-.q-score { font-weight: 600; font-size: 1em; color: var(--text-dark); }
+.q-score { font-weight: 600; font-size: 1em; color: var(--text-dark); /* Default color */ }
+/* Add score-based colors */
+.q-score.score-high { color: var(--ncoss-bright-green); } /* >= 4.0 */
+.q-score.score-mid { color: var(--ncoss-pop-yellow); } /* 3.0 - 3.99 */
+.q-score.score-low { color: #dc3545; } /* < 3.0 */
 .q-respondents { font-size: 0.75em; color: var(--ncoss-grey-tint-80); padding-left: 0.3em; }
 
 /* Remove percentile styles */
@@ -460,59 +493,85 @@ textarea:focus {
 }
 
 /* Category Pyramid Styles */
+/* Category Pyramid Styles */
+/* Category Pyramid Styles */
 .category-pyramid .pyramid-container {
     display: flex;
-    flex-direction: column-reverse; /* Stack from bottom up */
+    flex-direction: column; /* HTML order: Growth -> Basic Needs */
     align-items: center;
     margin-top: 1em;
-    gap: 0.5em; /* Space between levels */
+    /* gap: 0; */ /* Remove gap, use margin overlap */
 }
 
+/* Base style for pyramid levels - shape defined by clip-path */
+/* Base style for pyramid levels - shape defined by clip-path */
 .pyramid-level {
-    width: 90%; /* Start with a base width */
-    padding: 0.8em 1em;
-    border: 2px solid var(--ncoss-grey); /* Default border */
-    border-radius: 4px;
+    width: 100%; /* Let container control width */
+    padding: 0.8em 1.5em; /* Adjust padding */
     text-align: center;
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Center content horizontally */
     align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    background-color: #fff; /* White background */
+    gap: 0.5em; /* Space between name and score */
+    position: relative;
+    color: var(--text-dark); /* Default text color */
+    margin-top: -12px; /* Overlap levels slightly */
+    min-height: 45px; /* Ensure minimum height */
+    box-sizing: border-box;
+}
+.pyramid-level:first-child {
+     margin-top: 0; /* No overlap for the top element (Growth) */
 }
 
-/* Adjust width for pyramid shape */
-.pyramid-level.basic-needs {
-    width: 100%;
-    border-color: var(--ncoss-pop-yellow); /* Example color */
-    background-color: var(--ncoss-pop-yellow-tint-20);
+/* Define category colors based on image */
+:root {
+    --pyramid-color-basic: #DCECB3; /* Light lime/yellow */
+    --pyramid-color-individual: #AED883; /* Light green */
+    --pyramid-color-teamwork: #78C043; /* NCOSS Bright Green */
+    --pyramid-color-growth: #285D50; /* NCOSS Dark Green */
+    --pyramid-text-growth: #fff; /* White text for dark background */
 }
-.pyramid-level.individual {
-    width: 85%;
-    border-color: var(--ncoss-pop-blue); /* Example color */
-     background-color: rgba(0, 168, 191, 0.1); /* Pop blue tint */
+
+/* Apply clip-path and specific colors - ORDER MATTERS for visual stacking */
+/* HTML Order should be: Growth, Teamwork, Individual, Basic Needs */
+.pyramid-level.growth {
+     background-color: var(--pyramid-color-growth);
+     color: var(--pyramid-text-growth); /* White text */
+     clip-path: polygon(20% 0%, 80% 0%, 85% 100%, 15% 100%); /* Narrow top */
+     z-index: 4; /* Top layer */
 }
 .pyramid-level.teamwork {
-    width: 70%;
-    border-color: var(--ncoss-pop-salmon); /* Example color */
-     background-color: rgba(228, 162, 190, 0.1); /* Salmon tint */
+     background-color: var(--pyramid-color-teamwork);
+     clip-path: polygon(15% 0%, 85% 0%, 90% 100%, 10% 100%);
+     z-index: 3;
 }
-.pyramid-level.growth {
-    width: 55%;
-    border-color: var(--ncoss-bright-green); /* Example color */
-     background-color: var(--ncoss-bright-green-tint-20);
+.pyramid-level.individual {
+     background-color: var(--pyramid-color-individual);
+     clip-path: polygon(10% 0%, 90% 0%, 95% 100%, 5% 100%);
+     z-index: 2;
 }
+.pyramid-level.basic-needs {
+    background-color: var(--pyramid-color-basic);
+    clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%); /* Widest base */
+    z-index: 1; /* Base layer */
+}
+
+/* Add category dot colors */
+.q-category-dot.category-basic-needs { background-color: var(--pyramid-color-basic); border: 1px solid #b8d18c; }
+.q-category-dot.category-individual { background-color: var(--pyramid-color-individual); border: 1px solid #8cb36a; }
+.q-category-dot.category-teamwork { background-color: var(--pyramid-color-teamwork); border: 1px solid #5a9632; }
+.q-category-dot.category-growth { background-color: var(--pyramid-color-growth); border: 1px solid #1c4137; }
 
 .pyramid-level .category-name {
     font-weight: 600;
-    color: var(--ncoss-grey);
+    /* color adjusted by parent .pyramid-level.growth */
     font-size: 0.9em;
 }
 
 .pyramid-level .category-score {
     font-weight: 600;
+    /* color adjusted by parent .pyramid-level.growth */
     font-size: 1.1em;
-    color: var(--text-dark);
 }
 /* --- END NEW DASHBOARD STYLES --- */
 

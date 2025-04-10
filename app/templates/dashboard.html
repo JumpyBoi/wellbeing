@@ -194,32 +194,47 @@
                         yearData.questions.forEach(q => {
                             const row = tableBody.insertRow();
 
-                            // Q ID Cell
-                            const cellId = row.insertCell();
-                            cellId.className = 'q-id';
-                            cellId.textContent = q.id; // Use integer ID
-
+                            // Q ID Cell (with category dot)
+                            const cellIdContainer = row.insertCell();
+                            cellIdContainer.className = 'q-id-container';
+                            // Create dot
+                            const dot = document.createElement('span');
+                            dot.className = `q-category-dot category-${q.category || 'unknown'}`; // Add category class
+                            cellIdContainer.appendChild(dot);
+                            // Create ID span
+                            const idSpan = document.createElement('span');
+                            idSpan.className = 'q-id';
+                            idSpan.textContent = q.id; // Use integer ID
+                            cellIdContainer.appendChild(idSpan);
                             // Question Text Cell
                             const cellText = row.insertCell();
                             cellText.className = 'q-text-container';
-                            // Determine color bar color based on score
-                            let colorBarColor = 'var(--ncoss-pop-yellow)'; // Default mid
-                            if (q.score >= 4.0) colorBarColor = 'var(--ncoss-bright-green)';
-                            else if (q.score < 3.0) colorBarColor = '#dc3545'; // Red
+                            // Removed color bar logic
+
+                            // Calculate score percentage (assuming max score is 5)
+                            const scorePercent = q.score !== undefined ? (q.score / 5) * 100 : 0;
+                            const categoryClass = `category-${q.category || 'unknown'}`;
 
                             cellText.innerHTML = `
-                                <div class="q-color-bar" style="background-color: ${colorBarColor};"></div>
                                 <div>
                                     <span class="q-short-text">${q.question}</span> <!-- Use 'question' field -->
                                     <span class="q-full-text">${q.description}</span> <!-- Use 'description' field -->
+                                    <div class="q-score-bar-container">
+                                        <div class="q-score-bar ${categoryClass}" style="width: ${scorePercent}%;"></div>
+                                    </div>
                                 </div>
                             `;
 
                             // Score Cell
                             const cellScore = row.insertCell();
                             cellScore.className = 'q-score-col';
+                            // Determine score class
+                            let scoreClass = 'score-mid'; // Default
+                            if (q.score >= 4.0) scoreClass = 'score-high';
+                            else if (q.score < 3.0) scoreClass = 'score-low';
+
                             cellScore.innerHTML = `
-                                <span class="q-score">${q.score !== undefined ? q.score.toFixed(2) : '--'}</span>
+                                <span class="q-score ${scoreClass}">${q.score !== undefined ? q.score.toFixed(2) : '--'}</span>
                                 <span class="q-respondents">(${q.respondents !== undefined ? q.respondents : 0})</span>
                             `;
                         });
