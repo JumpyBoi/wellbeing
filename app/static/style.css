@@ -661,7 +661,7 @@ textarea:focus {
 /* Base style for pyramid levels - shape defined by clip-path */
 .pyramid-level {
     width: 100%; /* Let container control width */
-    padding: 1.2em 1.5em; /* INCREASE vertical padding */
+    padding: 1.8em 1.5em 1.2em 1.5em; /* INCREASE top/bottom padding further */
     text-align: center;
     display: flex;
     justify-content: center; /* Center content horizontally */
@@ -670,7 +670,7 @@ textarea:focus {
     position: relative;
     color: var(--text-dark); /* Default text color */
     /* margin-top: -12px; */ /* REMOVE overlap */
-    min-height: 60px; /* INCREASE minimum height */
+    min-height: 75px; /* INCREASE minimum height further */
     box-sizing: border-box;
 }
 .pyramid-level:first-child {
@@ -736,7 +736,7 @@ textarea:focus {
 /* Styles for Question Bubbles on Pyramid */
 .pyramid-q-bubbles {
     position: absolute;
-    top: -16px; /* Adjust vertical position slightly */
+    top: -18px; /* Adjust vertical position for taller segments */
     left: 0;
     width: 100%;
     display: flex;
