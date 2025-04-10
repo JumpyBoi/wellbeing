@@ -736,7 +736,7 @@ textarea:focus {
 /* Styles for Question Bubbles on Pyramid */
 .pyramid-q-bubbles {
     position: absolute;
-    top: -18px; /* Adjust vertical position for taller segments */
+    top: 10px; /* Position from the top edge *inside* the parent */
     left: 0;
     width: 100%;
     display: flex;
