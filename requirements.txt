@@ -1,4 +1,4 @@
 Flask>=2.0
 Flask-SQLAlchemy>=2.5 # Or latest compatible version
-psycopg2-binary>=2.9 # Or latest compatible version
+psycopg2>=2.9 # Use non-binary version
 python-dotenv>=0.19 # For handling environment variables locally (optional but good practice)
