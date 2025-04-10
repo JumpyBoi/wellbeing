@@ -602,6 +602,42 @@ textarea:focus {
     /* color adjusted by parent .pyramid-level.growth */
     font-size: 1.1em;
 }
+
+/* Styles for Question Bubbles on Pyramid */
+.pyramid-q-bubbles {
+    position: absolute;
+    top: -15px; /* Position above the level, adjust as needed */
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 8%; /* Adjust gap between bubbles */
+    z-index: 5; /* Ensure bubbles are on top */
+    pointer-events: none; /* Prevent bubbles interfering with clicks */
+}
+
+.pyramid-q-bubble {
+    background-color: #fff;
+    color: #000;
+    border-radius: 50%;
+    width: 30px; /* Adjust size */
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75em;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    line-height: 1;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Adjust bubble positioning for specific levels if needed */
+/* These might need tweaking based on exact pyramid shape/width */
+.pyramid-level.basic-needs .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 5%; }
+.pyramid-level.individual .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 10%; }
+.pyramid-level.teamwork .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 15%; }
+.pyramid-level.growth .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 20%; }
 /* --- END NEW DASHBOARD STYLES --- */
 
 
