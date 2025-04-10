@@ -824,6 +824,129 @@ textarea:focus {
 /* #engagementScore { ... } */ /* Remove if not used */
 
 
+/* --- Comparison Tab Styles --- */
+.comparison-tab-content {
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column;
+    gap: 2em; /* Space between sections */
+}
+.comparison-section {
+    background-color: #fff;
+    padding: 1.5em;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-grey);
+}
+.comparison-title {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--ncoss-dark-green);
+    margin-top: 0;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--ncoss-bright-green);
+    text-align: left;
+}
+.chart-container {
+    position: relative; /* Needed for Chart.js responsiveness */
+    height: 350px; /* Default height, adjust as needed */
+    width: 100%;
+}
+
+/* Indicator Cards Section */
+.indicator-cards-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive grid */
+    gap: 1em;
+    background-color: transparent; /* Remove card background */
+    border: none;
+    box-shadow: none;
+    padding: 0; /* Remove section padding */
+}
+.indicator-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-grey);
+    padding: 1em;
+    border-left: 4px solid transparent; /* Default border */
+    transition: border-color 0.3s ease;
+}
+.indicator-card.positive-border { border-left-color: var(--ncoss-bright-green); }
+.indicator-card.negative-border { border-left-color: #dc3545; }
+
+.indicator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5em;
+}
+.indicator-title {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--ncoss-grey);
+    margin: 0;
+}
+.indicator-diff {
+    font-size: 0.8em;
+    font-weight: 600;
+}
+.indicator-diff .positive { color: var(--ncoss-bright-green); }
+.indicator-diff .negative { color: #dc3545; }
+
+.indicator-body {
+    margin-top: 0.5em;
+}
+.indicator-score {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.1;
+}
+.indicator-label {
+    font-size: 0.75em;
+    color: var(--ncoss-grey-tint-80);
+}
+
+
+/* Comparison Table Styles (if not already present/correct) */
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-grey);
+    overflow: hidden; /* Ensures border-radius applies to table */
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 0.8em 1em;
+    text-align: left;
+    border-bottom: 1px solid var(--border-grey);
+}
+.comparison-table thead th {
+    background-color: var(--background-light-grey);
+    font-weight: 600;
+    color: var(--ncoss-grey);
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+.comparison-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.comparison-table tbody tr:hover {
+    background-color: var(--ncoss-bright-green-tint-20);
+}
+.comparison-table td:first-child { /* Metric column */
+    font-weight: 600;
+    color: var(--ncoss-dark-green);
+}
+.comparison-table td:not(:first-child) { /* Year columns */
+    text-align: center;
+}
+
 /* Flash Messages (Keep) */
 .flash-messages {
     list-style: none;
