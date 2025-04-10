@@ -10,3 +10,4 @@ local_dev.db
 # OS generated files
 .DS_Store
 Thumbs.db
+.vercel
