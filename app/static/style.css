@@ -367,7 +367,14 @@ textarea:focus {
     grid-template-columns: 1fr 1.2fr; /* Give right column slightly more space */
     gap: 1.5em; /* Gap between cards */
 }
-.category-pyramid { grid-column: 1 / 2; grid-row: 2 / 3; }
+.category-pyramid {
+    grid-column: 1 / 2; grid-row: 2 / 3;
+    display: flex; /* Enable flexbox for centering */
+    flex-direction: column; /* Stack title and pyramid */
+    /* align-items: center; */ /* Center horizontally if needed */
+    justify-content: center; /* Center vertically */
+    min-height: 300px; /* Give card height for centering to work */
+}
 .question-list { grid-column: 2 / 3; grid-row: 2 / 3; }
 .custom-q1 { grid-column: 1 / 2; grid-row: 3 / 4; }
 .custom-q2 { grid-column: 2 / 3; grid-row: 3 / 4; }
@@ -419,14 +426,26 @@ textarea:focus {
 /* Question List Table (within card) */
 .question-list .results-table { width: 100%; border-collapse: collapse; margin-top: -0.5em; /* Adjust spacing */ }
 .question-list .results-table th,
-.question-list .results-table td { padding: 0.6em 0.4em; text-align: left; border-bottom: 1px solid var(--border-grey); vertical-align: middle; /* Align middle */ }
+.question-list .results-table td {
+    padding: 0.8em 0.5em; /* Increase padding slightly */
+    text-align: left;
+    border-bottom: 1px solid var(--border-grey);
+    vertical-align: top; /* Align content to the top */
+}
+/* Specific alignment for headers */
+.question-list .results-table thead th:nth-child(1) { width: 5%; text-align: center; } /* # column */
+.question-list .results-table thead th:nth-child(2) { width: 65%; } /* Question column */
+.question-list .results-table thead th:nth-child(3) { width: 30%; text-align: right; } /* Score column */
+
 .results-table thead th { font-weight: 600; color: var(--ncoss-grey); font-size: 0.9em; text-transform: uppercase; border-bottom-width: 2px; }
 .results-table tbody tr:hover { background-color: var(--background-light-grey); }
 
-.q-id-container { display: flex; align-items: center; gap: 0.5em; width: 5%; justify-content: center; padding-left: 5px; /* Add padding for dot */ } /* Container for ID and dot */
-.q-category-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; } /* Style for the category dot */
-.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1em; }
-.q-text-container { display: flex; flex-direction: column; /* Stack text and bar */ align-items: flex-start; width: 65%; } /* Give text more width */
+/* Ensure ID container aligns dot and number horizontally and centers in its column */
+.q-id-container { display: flex; align-items: center; gap: 0.5em; justify-content: center; /* Center content */ height: 100%; /* Try to match cell height */ }
+.q-category-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1em; line-height: 1; /* Prevent extra space */ }
+/* Ensure text container takes available space and stacks content */
+.q-text-container { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; /* Center content vertically */ height: 100%; }
 /* Remove .q-color-bar style */
 /* .q-color-bar { ... } */
 .q-short-text { font-weight: 600; color: var(--text-dark); display: block; margin-bottom: 0.2em; }
@@ -452,7 +471,8 @@ textarea:focus {
 .q-score-bar.category-teamwork { background-color: var(--pyramid-color-teamwork); }
 .q-score-bar.category-growth { background-color: var(--pyramid-color-growth); }
 
-.q-score-col { width: 30%; text-align: right; } /* Give score col more width */
+/* Ensure score column aligns right */
+.q-score-col { text-align: right; }
 .q-score { font-weight: 600; font-size: 1em; color: var(--text-dark); /* Default color */ }
 /* Add score-based colors */
 .q-score.score-high { color: var(--ncoss-bright-green); } /* >= 4.0 */
@@ -515,7 +535,7 @@ textarea:focus {
     gap: 0.5em; /* Space between name and score */
     position: relative;
     color: var(--text-dark); /* Default text color */
-    margin-top: -12px; /* Overlap levels slightly */
+    /* margin-top: -12px; */ /* REMOVE overlap */
     min-height: 45px; /* Ensure minimum height */
     box-sizing: border-box;
 }
