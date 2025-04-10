@@ -277,65 +277,99 @@ textarea:focus {
     max-width: 1200px; /* Wider container for dashboard */
     margin: 2em auto;
     padding: 1em;
-    background-color: #fff; /* White background for dashboard area */
+    background-color: var(--background-light-grey); /* Light grey overall background */
     box-sizing: border-box;
 }
 .dashboard-header {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--border-grey);
-    padding-bottom: 1em;
+    justify-content: space-between; /* Space out logo/title and controls */
+    background-color: #fff;
+    padding: 1em 1.5em;
     margin-bottom: 1.5em;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
-.header-logo { /* Placeholder */
-    width: 50px; height: 50px; background-color: var(--ncoss-grey-tint-20);
-    margin-right: 1em; border-radius: 4px;
-    /* Add NCOSS logo image here if available */
+.header-logo {
+    height: 40px; /* Adjust size */
+    width: auto;
+    margin-right: 1em;
+}
+.header-text {
+    flex-grow: 1;
 }
 .header-title {
-    font-size: 1.8em;
+    font-size: 1.6em; /* Adjust size */
     font-weight: 600;
     color: var(--ncoss-grey);
-    text-align: left; /* Override general h1 center */
+    text-align: left;
     margin: 0;
 }
 .header-subtitle {
-    font-size: 0.9em;
+    font-size: 0.8em; /* Adjust size */
     color: var(--ncoss-grey-tint-80);
-    margin: 0.2em 0;
+    margin: 0.2em 0 0 0;
+    text-align: left;
 }
-.dashboard-main {
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+.header-controls label {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--ncoss-grey);
+}
+.header-controls select {
+    padding: 0.4em 0.6em;
+    border: 1px solid var(--border-grey);
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9em;
+    background-color: #fff;
+}
+
+/* New Grid Layout */
+.dashboard-grid {
     display: grid;
-    grid-template-columns: 3fr 1fr; /* Adjust ratio if needed */
-    gap: 2em;
+    grid-template-columns: repeat(2, 1fr); /* Two equal columns */
+    gap: 1.5em; /* Gap between cards */
 }
-.dashboard-sidebar {
+
+/* General Card Styling */
+.dashboard-card {
+    background-color: #fff;
     padding: 1.5em;
-    background-color: var(--background-light-grey);
     border-radius: 8px;
-    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     border: 1px solid var(--border-grey);
 }
-.sidebar-title {
+
+.dashboard-card h3 {
+    font-size: 1.1em; /* Smaller heading for cards */
     font-weight: 600;
-    color: var(--ncoss-grey);
-    margin-bottom: 1.5em;
-    font-size: 1.1em;
-    text-align: center; /* Override general h3 center */
-}
-/* Engagement Index Section */
-.engagement-index {
-    margin-bottom: 2em;
-    border-bottom: 1px solid var(--border-grey);
-    padding-bottom: 1.5em;
-}
-.engagement-index h3 {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: var(--ncoss-grey);
+    color: var(--ncoss-dark-green);
+    margin-top: 0;
     margin-bottom: 1em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--ncoss-bright-green);
     text-align: left; /* Override general h3 center */
 }
+
+/* Specific Card Layout Adjustments */
+.engagement-index { grid-column: 1 / 2; grid-row: 1 / 2; }
+.overall-score { grid-column: 2 / 3; grid-row: 1 / 2; }
+.category-pyramid { grid-column: 1 / 2; grid-row: 2 / 3; }
+.question-list { grid-column: 2 / 3; grid-row: 2 / 3; }
+.custom-q1 { grid-column: 1 / 2; grid-row: 3 / 4; }
+.custom-q2 { grid-column: 2 / 3; grid-row: 3 / 4; }
+
+/* Remove old sidebar styles */
+/* .dashboard-sidebar { ... } */
+/* .sidebar-title { ... } */
+/* Engagement Index Section (within card) */
+/* .engagement-index h3 is handled by .dashboard-card h3 */
 .engagement-legend {
     display: flex;
     gap: 1.5em;
@@ -357,86 +391,142 @@ textarea:focus {
 .bar-not-engaged { background-color: var(--ncoss-grey-tint-80); color: var(--text-dark); }
 .bar-disengaged { background-color: var(--text-dark); }
 
-/* Grand Mean Section */
-.grand-mean-container {
-    /* Placeholder for circular gauge - requires JS library or complex CSS */
-    width: 150px; height: 150px; border: 10px solid var(--ncoss-grey-tint-20);
-    /* border-top-color: var(--ncoss-pop-yellow); Example - JS should set this based on value */
-    border-radius: 50%; margin: 0 auto 1em auto;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    position: relative; /* For potential JS gauge */
+/* Overall Score / Grand Mean Section (within card) */
+.overall-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
-.grand-mean-value { font-size: 2em; font-weight: 600; color: var(--ncoss-grey); }
-.grand-mean-label { font-size: 0.8em; color: var(--ncoss-grey-tint-80); text-transform: uppercase; }
+.grand-mean-container {
+    /* Simplified display - remove complex border gauge */
+    text-align: center;
+    margin-top: 1em; /* Add some space */
+}
+.grand-mean-value { font-size: 2.5em; font-weight: 600; color: var(--ncoss-grey); display: block; }
+.grand-mean-label { font-size: 0.9em; color: var(--ncoss-grey-tint-80); text-transform: uppercase; display: block; }
+/* Remove old gauge border style */
+/* #grand-mean-gauge { border: ... } */
 
 /* Results Table */
-.results-table { width: 100%; border-collapse: collapse; }
-.results-table th, .results-table td { padding: 0.8em 0.5em; text-align: left; border-bottom: 1px solid var(--border-grey); vertical-align: top; }
+/* Question List Table (within card) */
+.question-list .results-table { width: 100%; border-collapse: collapse; margin-top: -0.5em; /* Adjust spacing */ }
+.question-list .results-table th,
+.question-list .results-table td { padding: 0.6em 0.4em; text-align: left; border-bottom: 1px solid var(--border-grey); vertical-align: middle; /* Align middle */ }
 .results-table thead th { font-weight: 600; color: var(--ncoss-grey); font-size: 0.9em; text-transform: uppercase; border-bottom-width: 2px; }
 .results-table tbody tr:hover { background-color: var(--background-light-grey); }
 
-.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1.1em; padding-right: 0.5em; width: 5%; } /* Give ID a small width */
-.q-text-container { display: flex; align-items: flex-start; width: 50%; } /* Give text more width */
-.q-color-bar { width: 5px; min-height: 30px; margin-right: 0.8em; background-color: var(--ncoss-pop-yellow); /* Default color */ border-radius: 2px; flex-shrink: 0; }
+.q-id { font-weight: 600; color: var(--ncoss-grey); font-size: 1em; padding-right: 0.5em; width: 5%; text-align: center; }
+.q-text-container { display: flex; align-items: center; width: 65%; } /* Give text more width, align center */
+.q-color-bar { width: 5px; height: 25px; /* Adjust height */ margin-right: 0.8em; background-color: var(--ncoss-pop-yellow); border-radius: 2px; flex-shrink: 0; }
 /* TODO: Add specific colors for q-color-bar based on question or score? */
 .q-short-text { font-weight: 600; color: var(--text-dark); display: block; margin-bottom: 0.2em; }
 .q-full-text { font-size: 0.85em; color: var(--ncoss-grey-tint-80); }
 
-.q-score-col { width: 15%; text-align: right; } /* Column for score + respondents */
-.q-score { font-weight: 600; font-size: 1.1em; color: var(--text-dark); }
-.q-respondents { font-size: 0.8em; color: var(--ncoss-grey-tint-80); padding-left: 0.2em; }
+.q-score-col { width: 30%; text-align: right; } /* Give score col more width */
+.q-score { font-weight: 600; font-size: 1em; color: var(--text-dark); }
+.q-respondents { font-size: 0.75em; color: var(--ncoss-grey-tint-80); padding-left: 0.3em; }
 
-.q-percentile-col { width: 30%; text-align: right; } /* Column for percentile + bar */
-.q-percentile { font-weight: 600; display: inline-block; width: 30px; text-align: right; margin-right: 1em;} /* Placeholder */
-.q-percentile-bar-container { display: inline-block; width: 100px; height: 15px; background-color: var(--ncoss-grey-tint-20); border-radius: 3px; overflow: hidden; vertical-align: middle; }
-.q-percentile-bar { height: 100%; background-color: var(--ncoss-pop-yellow); /* Default */ transition: width 0.5s ease-in-out; }
-/* TODO: Add color logic for percentile bar based on rank */
-.q-percentile-bar.rank-low { background-color: #dc3545; } /* Example Red */
-.q-percentile-bar.rank-mid { background-color: var(--ncoss-pop-yellow); } /* Example Yellow */
-.q-percentile-bar.rank-high { background-color: var(--ncoss-bright-green); } /* Example Green */
+/* Remove percentile styles */
+/* .q-percentile-col { ... } */
+/* .q-percentile { ... } */
+/* .q-percentile-bar-container { ... } */
+/* .q-percentile-bar { ... } */
 
 
 /* Custom Responses Section (Optional) */
-.custom-responses-section { grid-column: 1 / -1; /* Span both columns */ margin-top: 2em; }
+/* Custom Responses Section (within cards) */
+.custom-responses .response-list {
+    margin-top: 0; /* Remove extra margin */
+    border: none; /* Remove border */
+    padding: 0; /* Remove padding */
+    box-shadow: none; /* Remove shadow */
+    max-height: 250px; /* Limit height */
+    overflow-y: auto; /* Add scroll */
+}
+.custom-responses .response-list h3 { /* Already styled by card h3 */
+   display: none;
+}
+.custom-responses .response-list ul {
+    padding-left: 0; /* Remove default padding */
+}
+.custom-responses .response-list li {
+    background-color: var(--background-light-grey);
+    border: 1px solid var(--border-grey);
+    padding: 0.6em 0.8em; /* Adjust padding */
+    margin-bottom: 0.6em;
+    border-radius: 4px;
+    font-size: 0.9em; /* Adjust font size */
+}
 
+/* Category Pyramid Styles */
+.category-pyramid .pyramid-container {
+    display: flex;
+    flex-direction: column-reverse; /* Stack from bottom up */
+    align-items: center;
+    margin-top: 1em;
+    gap: 0.5em; /* Space between levels */
+}
 
+.pyramid-level {
+    width: 90%; /* Start with a base width */
+    padding: 0.8em 1em;
+    border: 2px solid var(--ncoss-grey); /* Default border */
+    border-radius: 4px;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    background-color: #fff; /* White background */
+}
+
+/* Adjust width for pyramid shape */
+.pyramid-level.basic-needs {
+    width: 100%;
+    border-color: var(--ncoss-pop-yellow); /* Example color */
+    background-color: var(--ncoss-pop-yellow-tint-20);
+}
+.pyramid-level.individual {
+    width: 85%;
+    border-color: var(--ncoss-pop-blue); /* Example color */
+     background-color: rgba(0, 168, 191, 0.1); /* Pop blue tint */
+}
+.pyramid-level.teamwork {
+    width: 70%;
+    border-color: var(--ncoss-pop-salmon); /* Example color */
+     background-color: rgba(228, 162, 190, 0.1); /* Salmon tint */
+}
+.pyramid-level.growth {
+    width: 55%;
+    border-color: var(--ncoss-bright-green); /* Example color */
+     background-color: var(--ncoss-bright-green-tint-20);
+}
+
+.pyramid-level .category-name {
+    font-weight: 600;
+    color: var(--ncoss-grey);
+    font-size: 0.9em;
+}
+
+.pyramid-level .category-score {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: var(--text-dark);
+}
 /* --- END NEW DASHBOARD STYLES --- */
 
 
 /* Dashboard Specific Styles (Existing - Remove/Merge if redundant) */
 /* .chart-container { ... } */ /* Remove if not used */
 
-.response-list { /* Keep for custom responses */
-    margin-top: 2em;
-    border: 1px solid var(--border-grey);
-    padding: 1.5em;
-    border-radius: 8px;
-    background-color: var(--text-light);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
+/* Adjustments for existing response list (used in custom questions) */
+/* .response-list { ... } */ /* Styles moved/adjusted above */
 
-.response-list h3 {
-    margin-top: 0;
-    color: var(--ncoss-dark-green);
-    border-bottom: 1px solid var(--ncoss-bright-green);
-    padding-bottom: 0.5em;
-    margin-bottom: 1em;
-    text-align: left; /* Override general h3 center */
-}
+/* .response-list h3 { ... } */ /* Handled by card h3 */
 
-.response-list ul {
-    list-style: none;
-    padding: 0;
-}
-
-.response-list li {
-    background-color: var(--background-light-grey);
-    border: 1px solid var(--border-grey);
-    padding: 0.8em 1em;
-    margin-bottom: 0.8em;
-    border-radius: 5px;
-    color: var(--ncoss-grey);
-}
+/* .response-list ul { ... } */ /* Adjusted above */
+/* .response-list li { ... } */ /* Adjusted above */
 
 /* #engagementScore { ... } */ /* Remove if not used */
 

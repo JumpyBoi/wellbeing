@@ -11,38 +11,74 @@
     <div class="dashboard-container">
         <header class="dashboard-header">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" class="header-logo">
-            <div>
-                <h1 class="header-title">Your Company Engagement Survey | Overall</h1>
-                <p class="header-subtitle">Percentile Range in Gallup Database: <span style="color: red;">■ <33</span> | <span style="color: orange;">■ 33-66</span> | <span style="color: green;">■ >66</span></p>
+            <div class="header-text">
+                <h1 class="header-title">Your Company Engagement Survey</h1>
                 <p class="header-subtitle"><small>* Item data not shown if sample size is less than 4. Workgroup data not shown to protect confidentiality.</small></p>
+            </div>
+            <div class="header-controls">
+                 <label for="yearSelector">Select Year:</label>
+                 <select id="yearSelector" name="year">
+                     <option value="">Loading...</option>
+                 </select>
             </div>
         </header>
 
-        <main class="dashboard-main">
-            <section class="dashboard-content">
-                <!-- Engagement Index -->
-                <div class="engagement-index">
-                    <h3>ENGAGEMENT INDEX</h3>
-                    <div class="engagement-legend">
-                        <span class="legend-item"><span class="legend-color legend-engaged"></span> Engaged</span>
-                        <span class="legend-item"><span class="legend-color legend-not-engaged"></span> Not Engaged</span>
-                        <span class="legend-item"><span class="legend-color legend-disengaged"></span> Actively Disengaged</span>
+        <main class="dashboard-grid">
+             <!-- Top Row -->
+            <div class="dashboard-card engagement-index">
+                <h3>ENGAGEMENT INDEX</h3>
+                <div class="engagement-legend">
+                    <span class="legend-item"><span class="legend-color legend-engaged"></span> Engaged</span>
+                    <span class="legend-item"><span class="legend-color legend-not-engaged"></span> Not Engaged</span>
+                    <span class="legend-item"><span class="legend-color legend-disengaged"></span> Actively Disengaged</span>
+                </div>
+                <div class="engagement-bar-container" id="engagement-bar">
+                    <div class="engagement-bar-segment bar-engaged" id="bar-engaged" style="width: 0%;"><span></span></div>
+                    <div class="engagement-bar-segment bar-not-engaged" id="bar-not-engaged" style="width: 0%;"><span></span></div>
+                    <div class="engagement-bar-segment bar-disengaged" id="bar-disengaged" style="width: 0%;"><span></span></div>
+                </div>
+            </div>
+
+            <div class="dashboard-card overall-score">
+                <h3>OVERALL SCORE</h3>
+                 <div class="grand-mean-container" id="grand-mean-display">
+                    <span class="grand-mean-value" id="grand-mean-value">--</span>
+                    <span class="grand-mean-label">GRANDMEAN</span>
+                </div>
+            </div>
+
+            <!-- Middle Row -->
+             <div class="dashboard-card category-pyramid">
+                <h3>CATEGORY SCORES</h3>
+                <div class="pyramid-container" id="category-pyramid-display">
+                    <!-- Pyramid structure will be built by CSS/JS -->
+                     <div class="pyramid-level growth">
+                        <span class="category-name">Growth</span>
+                        <span class="category-score" id="score-growth">--</span>
                     </div>
-                    <!-- Placeholder: Add Engagement Index Ratio if calculated -->
-                    <div class="engagement-bar-container" id="engagement-bar">
-                        <div class="engagement-bar-segment bar-engaged" id="bar-engaged" style="width: 0%;"><span></span></div>
-                        <div class="engagement-bar-segment bar-not-engaged" id="bar-not-engaged" style="width: 0%;"><span></span></div>
-                        <div class="engagement-bar-segment bar-disengaged" id="bar-disengaged" style="width: 0%;"><span></span></div>
+                     <div class="pyramid-level teamwork">
+                        <span class="category-name">Teamwork</span>
+                        <span class="category-score" id="score-teamwork">--</span>
+                    </div>
+                     <div class="pyramid-level individual">
+                        <span class="category-name">Individual</span>
+                        <span class="category-score" id="score-individual">--</span>
+                    </div>
+                     <div class="pyramid-level basic-needs">
+                        <span class="category-name">Basic Needs</span>
+                        <span class="category-score" id="score-basic-needs">--</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Results Table -->
-                <table class="results-table" id="results-table">
+            <div class="dashboard-card question-list">
+                 <h3>QUESTION LIST</h3>
+                 <table class="results-table" id="results-table">
                     <thead>
                         <tr>
-                            <th colspan="2"></th>
-                            <th>Score (Respondents)</th>
-                            <!-- Removed Percentile Rank Header -->
+                            <th>#</th>
+                            <th>Question</th>
+                            <th>Score (Resp.)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,32 +86,21 @@
                         <tr><td colspan="3">Loading data...</td></tr>
                     </tbody>
                 </table>
+            </div>
 
-                 <!-- Custom Responses (Optional) -->
-                 <div class="custom-responses-section response-list">
-                    <h3>What we do well:</h3>
-                    <ul id="customQ1Responses">
-                        <li>Loading...</li>
-                    </ul>
-                </div>
-                <div class="custom-responses-section response-list">
-                    <h3>What we could improve:</h3>
-                    <ul id="customQ2Responses">
-                        <li>Loading...</li>
-                    </ul>
-                </div>
-
-            </section>
-
-            <aside class="dashboard-sidebar">
-                <h4 class="sidebar-title">YOUR COMPANY</h4>
-                <div class="grand-mean-container" id="grand-mean-gauge">
-                    <!-- Circular gauge would ideally be rendered here by JS -->
-                    <span class="grand-mean-value" id="grand-mean-value">--</span>
-                    <span class="grand-mean-label">GRANDMEAN</span>
-                </div>
-                <!-- Could add more sidebar content here -->
-            </aside>
+             <!-- Bottom Row - Custom Questions -->
+             <div class="dashboard-card custom-responses custom-q1">
+                <h3>What we do well:</h3>
+                <ul id="customQ1Responses" class="response-list">
+                    <li>Loading...</li>
+                </ul>
+            </div>
+            <div class="dashboard-card custom-responses custom-q2">
+                <h3>What we could improve:</h3>
+                <ul id="customQ2Responses" class="response-list">
+                    <li>Loading...</li>
+                </ul>
+            </div>
         </main>
 
     </div><!-- End .dashboard-container -->
@@ -83,140 +108,232 @@
     <!-- JavaScript to fetch data and render dashboard -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const yearSelector = document.getElementById('yearSelector');
+            let allData = []; // To store fetched data for all years
+
+            // --- Helper function to update all dashboard components ---
+            function updateDashboard(yearData) {
+                if (!yearData) {
+                    console.error("No data provided for the selected year.");
+                    // Optionally clear the dashboard or show a message
+                    clearDashboard();
+                    return;
+                }
+                console.log(`Updating dashboard for year: ${yearData.year}`, yearData);
+
+                // --- Populate Engagement Index Bar ---
+                const dist = yearData.engagementIndex; // Use the new structure
+                const engagedBar = document.getElementById('bar-engaged');
+                const notEngagedBar = document.getElementById('bar-not-engaged');
+                const disengagedBar = document.getElementById('bar-disengaged');
+
+                if (engagedBar && notEngagedBar && disengagedBar && dist) {
+                    // Use the direct keys from the new backend structure
+                    engagedBar.style.width = `${dist.engaged}%`;
+                    engagedBar.querySelector('span').textContent = `${dist.engaged}%`;
+                    notEngagedBar.style.width = `${dist.notEngaged}%`;
+                    notEngagedBar.querySelector('span').textContent = `${dist.notEngaged}%`;
+                    disengagedBar.style.width = `${dist.activelyDisengaged}%`;
+                    disengagedBar.querySelector('span').textContent = `${dist.activelyDisengaged}%`;
+
+                    // Hide text if percentage is too small (e.g., < 5%)
+                    [engagedBar, notEngagedBar, disengagedBar].forEach(bar => {
+                        const span = bar.querySelector('span');
+                        if (parseInt(bar.style.width) < 5) {
+                            span.style.display = 'none';
+                        } else {
+                             span.style.display = 'inline';
+                        }
+                    });
+                } else {
+                     console.warn("Engagement bar elements or data not found.");
+                     // Clear bars if data is missing
+                     if (engagedBar) engagedBar.style.width = '0%';
+                     if (notEngagedBar) notEngagedBar.style.width = '0%';
+                     if (disengagedBar) disengagedBar.style.width = '0%';
+                }
+
+
+                // --- Populate Overall Score (Grand Mean) ---
+                const grandMeanValue = document.getElementById('grand-mean-value');
+                const grandMeanDisplay = document.getElementById('grand-mean-display');
+                if (grandMeanValue && grandMeanDisplay) {
+                    grandMeanValue.textContent = yearData.grandMean !== undefined ? yearData.grandMean.toFixed(2) : '--';
+                    // Optional: Add color logic based on score
+                    let meanColor = 'var(--ncoss-pop-yellow)'; // Default mid
+                    if (yearData.grandMean >= 4.0) meanColor = 'var(--ncoss-bright-green)';
+                    else if (yearData.grandMean < 3.0) meanColor = '#dc3545'; // Red
+                    grandMeanDisplay.style.borderTopColor = meanColor; // Example styling
+                } else {
+                     console.warn("Grand mean elements not found.");
+                }
+
+                // --- Populate Category Pyramid ---
+                const categoryScores = yearData.categoryScores;
+                if (categoryScores) {
+                    document.getElementById('score-basic-needs').textContent = categoryScores['basic-needs'] !== undefined ? categoryScores['basic-needs'].toFixed(2) : '--';
+                    document.getElementById('score-individual').textContent = categoryScores['individual'] !== undefined ? categoryScores['individual'].toFixed(2) : '--';
+                    document.getElementById('score-teamwork').textContent = categoryScores['teamwork'] !== undefined ? categoryScores['teamwork'].toFixed(2) : '--';
+                    document.getElementById('score-growth').textContent = categoryScores['growth'] !== undefined ? categoryScores['growth'].toFixed(2) : '--';
+                    // Add color logic to pyramid levels if desired (similar to grand mean)
+                } else {
+                     console.warn("Category score data not found.");
+                     document.getElementById('score-basic-needs').textContent = '--';
+                     document.getElementById('score-individual').textContent = '--';
+                     document.getElementById('score-teamwork').textContent = '--';
+                     document.getElementById('score-growth').textContent = '--';
+                }
+
+
+                // --- Populate Results Table ---
+                const tableBody = document.querySelector('#results-table tbody');
+                if (tableBody) {
+                    tableBody.innerHTML = ''; // Clear previous rows
+
+                    if (yearData.questions && yearData.questions.length > 0) {
+                        yearData.questions.forEach(q => {
+                            const row = tableBody.insertRow();
+
+                            // Q ID Cell
+                            const cellId = row.insertCell();
+                            cellId.className = 'q-id';
+                            cellId.textContent = q.id; // Use integer ID
+
+                            // Question Text Cell
+                            const cellText = row.insertCell();
+                            cellText.className = 'q-text-container';
+                            // Determine color bar color based on score
+                            let colorBarColor = 'var(--ncoss-pop-yellow)'; // Default mid
+                            if (q.score >= 4.0) colorBarColor = 'var(--ncoss-bright-green)';
+                            else if (q.score < 3.0) colorBarColor = '#dc3545'; // Red
+
+                            cellText.innerHTML = `
+                                <div class="q-color-bar" style="background-color: ${colorBarColor};"></div>
+                                <div>
+                                    <span class="q-short-text">${q.question}</span> <!-- Use 'question' field -->
+                                    <span class="q-full-text">${q.description}</span> <!-- Use 'description' field -->
+                                </div>
+                            `;
+
+                            // Score Cell
+                            const cellScore = row.insertCell();
+                            cellScore.className = 'q-score-col';
+                            cellScore.innerHTML = `
+                                <span class="q-score">${q.score !== undefined ? q.score.toFixed(2) : '--'}</span>
+                                <span class="q-respondents">(${q.respondents !== undefined ? q.respondents : 0})</span>
+                            `;
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="3">No response data available for this year.</td></tr>';
+                    }
+                } else {
+                     console.warn("Results table body not found.");
+                }
+
+                // --- Populate Custom Responses ---
+                 function populateList(listId, responses) {
+                    const listElement = document.getElementById(listId);
+                    if (!listElement) return;
+                    listElement.innerHTML = ''; // Clear loading/previous content
+                    if (responses && responses.length > 0) {
+                        responses.forEach(response => {
+                            const li = document.createElement('li');
+                            li.textContent = response;
+                            listElement.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = "No responses submitted for this year.";
+                        li.style.fontStyle = 'italic';
+                        listElement.appendChild(li);
+                    }
+                }
+                populateList('customQ1Responses', yearData.customQ1Responses);
+                populateList('customQ2Responses', yearData.customQ2Responses);
+            }
+
+             // --- Function to clear dashboard display ---
+             function clearDashboard() {
+                 document.getElementById('bar-engaged').style.width = '0%';
+                 document.getElementById('bar-not-engaged').style.width = '0%';
+                 document.getElementById('bar-disengaged').style.width = '0%';
+                 document.getElementById('grand-mean-value').textContent = '--';
+                 document.getElementById('score-basic-needs').textContent = '--';
+                 document.getElementById('score-individual').textContent = '--';
+                 document.getElementById('score-teamwork').textContent = '--';
+                 document.getElementById('score-growth').textContent = '--';
+                 const tableBody = document.querySelector('#results-table tbody');
+                 if (tableBody) tableBody.innerHTML = '<tr><td colspan="3">Select a year to view data.</td></tr>';
+                 const q1List = document.getElementById('customQ1Responses');
+                 if (q1List) q1List.innerHTML = '<li>Select a year.</li>';
+                 const q2List = document.getElementById('customQ2Responses');
+                 if (q2List) q2List.innerHTML = '<li>Select a year.</li>';
+             }
+
+
+            // --- Fetch data and initialize ---
             fetch('/dashboard/data')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                         // Check for specific error structure from backend
+                         return response.json().then(errData => {
+                             throw new Error(`HTTP error! status: ${response.status}, message: ${errData.error || 'Unknown server error'}`);
+                         }).catch(() => {
+                             // Fallback if response is not JSON
+                             throw new Error(`HTTP error! status: ${response.status}`);
+                         });
                     }
                     return response.json();
                 })
-                .then(data => {
-                    if (data.error) {
-                         throw new Error(`Server error: ${data.error}`);
-                    }
-                    console.log("Dashboard Data:", data); // Log data for debugging
+                .then(fetchedData => {
+                    // Check if backend returned an error object instead of list
+                     if (fetchedData.error) {
+                         throw new Error(`Server error: ${fetchedData.error}`);
+                     }
+                     // Expecting a list of yearly data objects
+                     if (!Array.isArray(fetchedData)) {
+                         throw new Error("Invalid data format received from server.");
+                     }
 
-                    // --- Populate Engagement Index Bar ---
-                    const dist = data.engagement_distribution;
-                    const engagedBar = document.getElementById('bar-engaged');
-                    const notEngagedBar = document.getElementById('bar-not-engaged');
-                    const disengagedBar = document.getElementById('bar-disengaged');
+                    allData = fetchedData; // Store all fetched data
 
-                    if (engagedBar && notEngagedBar && disengagedBar) {
-                        engagedBar.style.width = `${dist.engaged_percent}%`;
-                        engagedBar.querySelector('span').textContent = `${dist.engaged_percent}%`;
-                        notEngagedBar.style.width = `${dist.not_engaged_percent}%`;
-                        notEngagedBar.querySelector('span').textContent = `${dist.not_engaged_percent}%`;
-                        disengagedBar.style.width = `${dist.actively_disengaged_percent}%`;
-                        disengagedBar.querySelector('span').textContent = `${dist.actively_disengaged_percent}%`;
-
-                        // Hide text if percentage is too small (e.g., < 5%)
-                        [engagedBar, notEngagedBar, disengagedBar].forEach(bar => {
-                            const span = bar.querySelector('span');
-                            if (parseInt(bar.style.width) < 5) {
-                                span.style.display = 'none';
-                            } else {
-                                 span.style.display = 'inline';
-                            }
+                    // Populate year selector
+                    yearSelector.innerHTML = ''; // Clear loading option
+                    if (allData.length > 0) {
+                        allData.forEach(data => {
+                            const option = document.createElement('option');
+                            option.value = data.year;
+                            option.textContent = data.year;
+                            yearSelector.appendChild(option);
                         });
+                        // Select the first year (most recent) by default
+                        yearSelector.value = allData[0].year;
+                        updateDashboard(allData[0]); // Update dashboard with the first year's data
+                    } else {
+                        // Handle case with no data at all
+                        yearSelector.innerHTML = '<option value="">No Data</option>';
+                        clearDashboard(); // Clear display areas
+                         const tableBody = document.querySelector('#results-table tbody');
+                         if (tableBody) tableBody.innerHTML = '<tr><td colspan="3">No survey data found.</td></tr>';
                     }
-
-
-                    // --- Populate Grand Mean ---
-                    const grandMeanValue = document.getElementById('grand-mean-value');
-                    const grandMeanGauge = document.getElementById('grand-mean-gauge'); // For potential gauge styling
-                    if (grandMeanValue) {
-                        grandMeanValue.textContent = data.grand_mean.toFixed(2);
-                        // TODO: Add JS logic to update border-top-color or a gauge library based on value
-                        // Example: Set border color based on score
-                         let meanColor = 'var(--ncoss-pop-yellow)'; // Default mid
-                         if (data.grand_mean >= 4.0) meanColor = 'var(--ncoss-bright-green)';
-                         else if (data.grand_mean < 3.0) meanColor = '#dc3545'; // Red
-                         if(grandMeanGauge) grandMeanGauge.style.borderTopColor = meanColor;
-
-                    }
-
-                    // --- Populate Results Table ---
-                    const tableBody = document.querySelector('#results-table tbody');
-                    if (tableBody) {
-                        tableBody.innerHTML = ''; // Clear loading row
-
-                        if (data.questions && data.questions.length > 0) {
-                            data.questions.forEach(q => {
-                                const row = tableBody.insertRow();
-
-                                // Q ID Cell
-                                const cellId = row.insertCell();
-                                cellId.className = 'q-id';
-                                cellId.textContent = q.id;
-
-                                // Question Text Cell
-                                const cellText = row.insertCell();
-                                cellText.className = 'q-text-container';
-                                // Determine color bar color (example logic)
-                                let colorBarColor = 'var(--ncoss-pop-yellow)'; // Default mid
-                                if (q.average >= 4.0) colorBarColor = 'var(--ncoss-bright-green)';
-                                else if (q.average < 3.0) colorBarColor = '#dc3545'; // Red
-
-                                cellText.innerHTML = `
-                                    <div class="q-color-bar" style="background-color: ${colorBarColor};"></div>
-                                    <div>
-                                        <span class="q-short-text">${q.short_text}</span>
-                                        <span class="q-full-text">${q.text}</span>
-                                    </div>
-                                `;
-
-                                // Score Cell
-                                const cellScore = row.insertCell();
-                                cellScore.className = 'q-score-col';
-                                cellScore.innerHTML = `
-                                    <span class="q-score">${q.average.toFixed(2)}</span>
-                                    <span class="q-respondents">(${q.respondents})</span>
-                                `;
-
-                                // Removed Percentile Cell creation
-                            });
-                        } else {
-                            tableBody.innerHTML = '<tr><td colspan="3">No response data available.</td></tr>';
-                        }
-                    }
-
-                    // --- Populate Custom Responses (Copied from previous version) ---
-                     function populateList(listId, responses) {
-                        const listElement = document.getElementById(listId);
-                        if (!listElement) return; // Check if element exists
-                        listElement.innerHTML = ''; // Clear loading/previous content
-                        if (responses && responses.length > 0) {
-                            responses.forEach(response => {
-                                const li = document.createElement('li');
-                                li.textContent = response; // Basic sanitization
-                                listElement.appendChild(li);
-                            });
-                        } else {
-                            const li = document.createElement('li');
-                            li.textContent = "No responses submitted yet.";
-                            li.style.fontStyle = 'italic';
-                            listElement.appendChild(li);
-                        }
-                    }
-                    populateList('customQ1Responses', data.custom_q1_responses);
-                    populateList('customQ2Responses', data.custom_q2_responses);
-
                 })
                 .catch(error => {
                     console.error('Error fetching or processing dashboard data:', error);
-                    // Display user-friendly error message on the page
+                    // Display user-friendly error message
+                    clearDashboard(); // Clear display areas
                     const tableBody = document.querySelector('#results-table tbody');
                      if (tableBody) {
-                         tableBody.innerHTML = '<tr><td colspan="3">Error loading dashboard data. Please try again later.</td></tr>';
+                         tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Error loading dashboard data: ${error.message}. Please try again later.</td></tr>`;
                      }
-                     // Clear other fields too
-                     const grandMeanValue = document.getElementById('grand-mean-value');
-                     if(grandMeanValue) grandMeanValue.textContent = "Error";
-                     const engagementBar = document.getElementById('engagement-bar');
-                     if(engagementBar) engagementBar.innerHTML = '<div style="padding: 5px; color: red;">Error loading data</div>';
-
+                     yearSelector.innerHTML = '<option value="">Error</option>';
                 });
+
+            // --- Event listener for year selection change ---
+            yearSelector.addEventListener('change', function() {
+                const selectedYear = parseInt(this.value);
+                const selectedYearData = allData.find(data => data.year === selectedYear);
+                updateDashboard(selectedYearData);
+            });
         });
     </script>
 

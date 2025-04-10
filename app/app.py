@@ -163,7 +163,37 @@ def dashboard():
     # Add authentication/authorization check here later
     return render_template('dashboard.html')
 
-# Helper function to calculate distribution (keep this)
+# Define Gallup Q12 Categories and map questions
+GALLUP_CATEGORIES = {
+    'basic-needs': {'name': 'Basic Needs', 'questions': [1, 2]},
+    'individual': {'name': 'Individual Contribution', 'questions': [3, 4, 5, 6]},
+    'teamwork': {'name': 'Teamwork', 'questions': [7, 8, 9, 10]},
+    'growth': {'name': 'Growth', 'questions': [11, 12]}
+}
+
+# Map question ID (int) to category key
+QUESTION_TO_CATEGORY = {}
+for category, details in GALLUP_CATEGORIES.items():
+    for q_id in details['questions']:
+        QUESTION_TO_CATEGORY[q_id] = category
+
+# Update QUESTION_TEXTS to include category
+QUESTION_TEXTS = {
+    "Q1": {"short": "Know What's Expected", "full": "I know what is expected of me at work.", "category": "basic-needs"},
+    "Q2": {"short": "Materials and Equipment", "full": "I have the materials and equipment I need to do my work right.", "category": "basic-needs"},
+    "Q3": {"short": "Opportunity to Do Best", "full": "At work, I have the opportunity to do what I do best every day.", "category": "individual"},
+    "Q4": {"short": "Recognition", "full": "In the last seven days, I have received recognition or praise for doing good work.", "category": "individual"},
+    "Q5": {"short": "Cares About Me", "full": "My supervisor, or someone at work, seems to care about me as a person.", "category": "individual"},
+    "Q6": {"short": "Development", "full": "There is someone at work who encourages my development.", "category": "individual"},
+    "Q7": {"short": "Opinions Count", "full": "At work, my opinions seem to count.", "category": "teamwork"},
+    "Q8": {"short": "Mission/Purpose", "full": "The mission or purpose of my company makes me feel my job is important.", "category": "teamwork"},
+    "Q9": {"short": "Committed to Quality", "full": "My associates or fellow employees are committed to doing quality work.", "category": "teamwork"},
+    "Q10": {"short": "Best Friend", "full": "I have a best friend at work.", "category": "teamwork"},
+    "Q11": {"short": "Progress", "full": "In the last six months, someone at work has talked to me about my progress.", "category": "growth"},
+    "Q12": {"short": "Learn and Grow", "full": "In the last year, I have had opportunities at work to learn and grow.", "category": "growth"},
+}
+
+# Helper function to calculate distribution (remains mostly the same)
 def calculate_distribution(scores):
     """Calculates the distribution counts for a list of scores."""
     counts = {'engaged': 0, 'not_engaged': 0, 'actively_disengaged': 0}
@@ -180,33 +210,32 @@ def calculate_distribution(scores):
             counts['actively_disengaged'] += 1
     return counts, len(valid_scores)
 
-# Define question texts (keep this)
-QUESTION_TEXTS = {
-    "Q1": {"short": "Know What's Expected", "full": "I know what is expected of me at work."},
-    "Q2": {"short": "Materials and Equipment", "full": "I have the materials and equipment I need to do my work right."},
-    "Q3": {"short": "Opportunity to Do Best", "full": "At work, I have the opportunity to do what I do best every day."},
-    "Q4": {"short": "Recognition", "full": "In the last seven days, I have received recognition or praise for doing good work."},
-    "Q5": {"short": "Cares About Me", "full": "My supervisor, or someone at work, seems to care about me as a person."},
-    "Q6": {"short": "Development", "full": "There is someone at work who encourages my development."},
-    "Q7": {"short": "Opinions Count", "full": "At work, my opinions seem to count."},
-    "Q8": {"short": "Mission/Purpose", "full": "The mission or purpose of my company makes me feel my job is important."},
-    "Q9": {"short": "Committed to Quality", "full": "My associates or fellow employees are committed to doing quality work."},
-    "Q10": {"short": "Best Friend", "full": "I have a best friend at work."},
-    "Q11": {"short": "Progress", "full": "In the last six months, someone at work has talked to me about my progress."},
-    "Q12": {"short": "Learn and Grow", "full": "In the last year, I have had opportunities at work to learn and grow."},
-}
+# Function to safely parse year from timestamp string
+def get_year_from_timestamp(ts_str):
+    if not ts_str:
+        return None
+    try:
+        # Attempt parsing common ISO format and others if needed
+        dt_obj = datetime.datetime.fromisoformat(ts_str.split(' ')[0]) # Handle potential time part
+        return dt_obj.year
+    except ValueError:
+        try:
+             # Try another common format like YYYY-MM-DD
+             dt_obj = datetime.datetime.strptime(ts_str.split(' ')[0], '%Y-%m-%d')
+             return dt_obj.year
+        except ValueError:
+             logging.warning(f"Could not parse year from timestamp: {ts_str}")
+             return None # Or raise an error, or return a default year?
 
 @app.route('/dashboard/data')
 def dashboard_data():
-    """Provides data for the new dashboard format by reading from Google Sheets."""
+    """Provides data aggregated by year for the dashboard."""
     # Add authentication/authorization check here later
     try:
         service = get_sheets_service()
         if not service:
             raise Exception("Could not authenticate with Google Sheets API.")
 
-        # Read data from the sheet (assuming headers are in row 1)
-        # Adjust range if your data starts elsewhere or sheet name is different
         read_range = f"{SHEET_NAME}!A2:P" # Read Timestamp to CustomQ2, starting row 2
         result = service.spreadsheets().values().get(
             spreadsheetId=GOOGLE_SHEET_ID,
@@ -215,111 +244,150 @@ def dashboard_data():
         values = result.get('values', [])
 
         if not values:
-            # Return empty/default data if sheet is empty
-            return jsonify({
-                "grand_mean": 0, "total_responses": 0,
-                "engagement_distribution": {"engaged_percent": 0, "not_engaged_percent": 0, "actively_disengaged_percent": 0},
-                "questions": [], "custom_q1_responses": [], "custom_q2_responses": []
-            })
+            return jsonify([]) # Return empty list if no data
 
-        num_responses = len(values)
-        grand_total_score = 0
-        grand_valid_count = 0
-        overall_distribution_counts = {'engaged': 0, 'not_engaged': 0, 'actively_disengaged': 0}
-        questions_data = []
-        all_scores_by_q = defaultdict(list) # Store all scores for each question
-        custom_q1_responses = []
-        custom_q2_responses = []
+        # --- Group data by year ---
+        data_by_year = defaultdict(list)
+        for row in values:
+            if not row: continue # Skip empty rows
+            year = get_year_from_timestamp(row[0]) # Assuming timestamp is in column 0
+            if year:
+                data_by_year[year].append(row)
+            else:
+                 logging.warning(f"Skipping row due to unparseable timestamp: {row[0]}")
 
+
+        # --- Process data for each year ---
+        yearly_results = []
         # Define column indices based on assumed sheet structure
         # Timestamp=0, UUID=1, Q1=2, Q2=3, ..., Q12=13, CustomQ1=14, CustomQ2=15
         q_start_index = 2
         custom_q1_index = 14
         custom_q2_index = 15
 
-        for row in values:
-            # Extract scores, converting to int, handling errors/empty cells
+        # Sort years for consistent output order (most recent first)
+        sorted_years = sorted(data_by_year.keys(), reverse=True)
+
+        for year in sorted_years:
+            year_rows = data_by_year[year]
+            num_responses_year = len(year_rows)
+
+            # Aggregators for the current year
+            all_scores_year = [] # For overall engagement index
+            scores_by_q_year = defaultdict(list)
+            scores_by_category_year = defaultdict(list)
+            custom_q1_responses_year = []
+            custom_q2_responses_year = []
+
+            for row in year_rows:
+                # Extract scores for this row
+                row_scores = {}
+                for i in range(1, 13):
+                    q_key = f"q{i}"
+                    col_index = q_start_index + i - 1
+                    score = None
+                    try:
+                        if col_index < len(row) and row[col_index]:
+                             val = int(row[col_index])
+                             if 1 <= val <= 5:
+                                 score = val
+                    except (ValueError, TypeError, IndexError):
+                        pass # Keep score as None if invalid or missing
+
+                    if score is not None:
+                        scores_by_q_year[q_key].append(score)
+                        all_scores_year.append(score) # Add to overall list for engagement index
+                        # Add to category scores
+                        category = QUESTION_TEXTS[q_key.upper()].get("category")
+                        if category:
+                             scores_by_category_year[category].append(score)
+                    else:
+                         # Decide how to handle missing scores for averages if needed
+                         # Currently they are just ignored by statistics.mean
+                         pass
+
+
+                # Extract custom responses for this row
+                try:
+                    if custom_q1_index < len(row) and row[custom_q1_index]:
+                        custom_q1_responses_year.append(row[custom_q1_index])
+                    if custom_q2_index < len(row) and row[custom_q2_index]:
+                        custom_q2_responses_year.append(row[custom_q2_index])
+                except IndexError:
+                     pass
+
+            # --- Calculate aggregates for the year ---
+            questions_data_year = []
+            grand_total_score_year = 0
+            grand_valid_count_year = 0
+
             for i in range(1, 13):
                 q_key = f"q{i}"
-                col_index = q_start_index + i - 1
-                try:
-                    # Check if index exists and value is not empty before converting
-                    if col_index < len(row) and row[col_index]:
-                         score = int(row[col_index])
-                         if 1 <= score <= 5:
-                             all_scores_by_q[q_key].append(score)
-                         else:
-                             all_scores_by_q[q_key].append(None) # Mark invalid scores as None
-                    else:
-                         all_scores_by_q[q_key].append(None) # Mark empty cells as None
-                except (ValueError, TypeError):
-                    all_scores_by_q[q_key].append(None) # Mark conversion errors as None
+                q_key_upper = q_key.upper()
+                scores_for_q = scores_by_q_year[q_key] # Already filtered for valid scores
+                num_respondents_for_q = len(scores_for_q)
 
-            # Extract custom responses
-            try:
-                if custom_q1_index < len(row) and row[custom_q1_index]:
-                    custom_q1_responses.append(row[custom_q1_index])
-                if custom_q2_index < len(row) and row[custom_q2_index]:
-                    custom_q2_responses.append(row[custom_q2_index])
-            except IndexError:
-                 pass # Ignore if row is too short for custom questions
+                average_for_q = round(statistics.mean(scores_for_q), 2) if num_respondents_for_q > 0 else 0
 
-        # --- Calculate aggregates ---
-        for i in range(1, 13):
-            q_key = f"q{i}"
-            scores_for_q = all_scores_by_q[q_key]
-            valid_scores_for_q = [s for s in scores_for_q if s is not None] # Already filtered for 1-5 during collection
+                grand_total_score_year += sum(scores_for_q)
+                grand_valid_count_year += num_respondents_for_q
 
-            num_respondents_for_q = len(valid_scores_for_q)
-            # Use statistics.mean, handle empty list case
-            average_for_q = round(statistics.mean(valid_scores_for_q), 2) if num_respondents_for_q > 0 else 0
+                questions_data_year.append({
+                    "id": i, # Use integer ID
+                    "question": QUESTION_TEXTS[q_key_upper]["short"], # Short text
+                    "description": QUESTION_TEXTS[q_key_upper]["full"], # Full text
+                    "score": average_for_q,
+                    "respondents": num_respondents_for_q,
+                    "category": QUESTION_TEXTS[q_key_upper]["category"]
+                })
 
-            dist_counts, _ = calculate_distribution(scores_for_q) # Use helper
+            # Calculate Grand Mean for the year
+            grand_mean_year = round(grand_total_score_year / grand_valid_count_year, 2) if grand_valid_count_year > 0 else 0
 
-            grand_total_score += sum(valid_scores_for_q)
-            grand_valid_count += num_respondents_for_q
+            # Calculate Overall Engagement Distribution % for the year (using current method)
+            dist_counts_year, total_overall_scores_counted_year = calculate_distribution(all_scores_year)
+            engagement_distribution_percent_year = {
+                "engaged": round((dist_counts_year['engaged'] / total_overall_scores_counted_year) * 100) if total_overall_scores_counted_year > 0 else 0,
+                "notEngaged": round((dist_counts_year['not_engaged'] / total_overall_scores_counted_year) * 100) if total_overall_scores_counted_year > 0 else 0,
+                "activelyDisengaged": round((dist_counts_year['actively_disengaged'] / total_overall_scores_counted_year) * 100) if total_overall_scores_counted_year > 0 else 0,
+            }
+            # Adjust rounding to ensure sum is 100%
+            current_total_percent = sum(engagement_distribution_percent_year.values())
+            if total_overall_scores_counted_year > 0 and current_total_percent != 100:
+                 diff = 100 - current_total_percent
+                 # Add difference to the largest category to minimize visual impact
+                 max_cat_key = max(engagement_distribution_percent_year, key=engagement_distribution_percent_year.get)
+                 engagement_distribution_percent_year[max_cat_key] += diff
 
-            overall_distribution_counts['engaged'] += dist_counts['engaged']
-            overall_distribution_counts['not_engaged'] += dist_counts['not_engaged']
-            overall_distribution_counts['actively_disengaged'] += dist_counts['actively_disengaged']
 
-            questions_data.append({
-                "id": q_key.upper(),
-                "text": QUESTION_TEXTS[q_key.upper()]["full"],
-                "short_text": QUESTION_TEXTS[q_key.upper()]["short"],
-                "average": average_for_q,
-                "respondents": num_respondents_for_q,
-                "distribution": dist_counts
-            })
+            # Calculate Category Scores for the year
+            category_scores_year = {}
+            for category_key, details in GALLUP_CATEGORIES.items():
+                 scores_for_cat = scores_by_category_year[category_key]
+                 avg_score = round(statistics.mean(scores_for_cat), 2) if scores_for_cat else 0
+                 category_scores_year[category_key] = avg_score
 
-        # Calculate Grand Mean & Overall Distribution % (same logic as before)
-        grand_mean = round(grand_total_score / grand_valid_count, 2) if grand_valid_count > 0 else 0
-        total_overall_scores_counted = sum(overall_distribution_counts.values())
-        engagement_distribution_percent = {
-            "engaged_percent": round((overall_distribution_counts['engaged'] / total_overall_scores_counted) * 100) if total_overall_scores_counted > 0 else 0,
-            "not_engaged_percent": round((overall_distribution_counts['not_engaged'] / total_overall_scores_counted) * 100) if total_overall_scores_counted > 0 else 0,
-            "actively_disengaged_percent": round((overall_distribution_counts['actively_disengaged'] / total_overall_scores_counted) * 100) if total_overall_scores_counted > 0 else 0,
-        }
-        current_total_percent = sum(engagement_distribution_percent.values())
-        if total_overall_scores_counted > 0 and current_total_percent != 100:
-             diff = 100 - current_total_percent
-             max_cat = max(engagement_distribution_percent, key=engagement_distribution_percent.get)
-             engagement_distribution_percent[max_cat] += diff
 
-        data = {
-            "grand_mean": grand_mean,
-            "total_responses": num_responses,
-            "engagement_distribution": engagement_distribution_percent,
-            "questions": questions_data,
-            "custom_q1_responses": custom_q1_responses,
-            "custom_q2_responses": custom_q2_responses
-        }
-        return jsonify(data)
+            # Assemble data for this year
+            yearly_data = {
+                "year": year,
+                "grandMean": grand_mean_year,
+                "totalResponses": num_responses_year,
+                "engagementIndex": engagement_distribution_percent_year, # Renamed field
+                "questions": questions_data_year,
+                "categoryScores": category_scores_year,
+                "customQ1Responses": custom_q1_responses_year,
+                "customQ2Responses": custom_q2_responses_year
+            }
+            yearly_results.append(yearly_data)
+
+        return jsonify(yearly_results) # Return the list of yearly data
 
     except Exception as e:
         print(f"Error fetching/processing dashboard data from sheet: {e}")
         logging.exception("Dashboard data error")
-        return jsonify({"error": "Could not retrieve or process dashboard data"}), 500
+        # Return empty list on error, or specific error structure
+        return jsonify({"error": f"Could not retrieve or process dashboard data: {e}"}), 500
 
 
 @app.route('/my-results/<string:response_uuid>')
