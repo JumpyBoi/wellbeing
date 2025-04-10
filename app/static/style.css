@@ -626,7 +626,7 @@ textarea:focus {
 /* Base style for pyramid levels - shape defined by clip-path */
 .pyramid-level {
     width: 100%; /* Let container control width */
-    padding: 0.8em 1.5em; /* Adjust padding */
+    padding: 1.2em 1.5em; /* INCREASE vertical padding */
     text-align: center;
     display: flex;
     justify-content: center; /* Center content horizontally */
@@ -635,7 +635,7 @@ textarea:focus {
     position: relative;
     color: var(--text-dark); /* Default text color */
     /* margin-top: -12px; */ /* REMOVE overlap */
-    min-height: 45px; /* Ensure minimum height */
+    min-height: 60px; /* INCREASE minimum height */
     box-sizing: border-box;
 }
 .pyramid-level:first-child {
@@ -701,12 +701,12 @@ textarea:focus {
 /* Styles for Question Bubbles on Pyramid */
 .pyramid-q-bubbles {
     position: absolute;
-    top: -15px; /* Position above the level, adjust as needed */
+    top: -16px; /* Adjust vertical position slightly */
     left: 0;
     width: 100%;
     display: flex;
-    justify-content: center;
-    gap: 8%; /* Adjust gap between bubbles */
+    justify-content: center; /* Center bubbles container */
+    /* gap: 8%; */ /* Remove fixed gap, use padding/justify */
     z-index: 5; /* Ensure bubbles are on top */
     pointer-events: none; /* Prevent bubbles interfering with clicks */
 }
@@ -727,12 +727,11 @@ textarea:focus {
     flex-shrink: 0; /* Prevent shrinking */
 }
 
-/* Adjust bubble positioning for specific levels if needed */
-/* These might need tweaking based on exact pyramid shape/width */
-.pyramid-level.basic-needs .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 5%; }
-.pyramid-level.individual .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 10%; }
-.pyramid-level.teamwork .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 15%; }
-.pyramid-level.growth .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 20%; }
+/* Adjust bubble positioning for specific levels for even spacing */
+.pyramid-level.basic-needs .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 15%; } /* Wider spacing for 2 bubbles */
+.pyramid-level.individual .pyramid-q-bubbles { justify-content: space-between; padding: 0 12%; } /* Adjust padding for 4 bubbles */
+.pyramid-level.teamwork .pyramid-q-bubbles { justify-content: space-between; padding: 0 18%; } /* Adjust padding for 4 bubbles */
+.pyramid-level.growth .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 25%; } /* Wider spacing for 2 bubbles */
 /* --- END NEW DASHBOARD STYLES --- */
 
 
