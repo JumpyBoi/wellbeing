@@ -734,26 +734,17 @@ textarea:focus {
 }
 
 /* Styles for Question Bubbles on Pyramid */
-.pyramid-q-bubbles-container { /* New overall container */
+.pyramid-q-bubbles {
     position: absolute;
     top: 10px; /* Position from the top edge *inside* the parent */
     left: 0;
     width: 100%;
     display: flex;
-    justify-content: space-between; /* Push left/right groups apart */
-    padding: 0 5%; /* Add some padding from the edges */
-    box-sizing: border-box;
+    justify-content: center; /* Center bubbles container */
+    /* gap: 8%; */ /* Remove fixed gap, use padding/justify */
     z-index: 5; /* Ensure bubbles are on top */
     pointer-events: none; /* Prevent bubbles interfering with clicks */
 }
-.pyramid-q-bubbles-left,
-.pyramid-q-bubbles-right {
-    display: flex;
-    gap: 5px; /* Small gap between bubbles in a group */
-    pointer-events: auto; /* Allow interaction if needed later */
-}
-.pyramid-q-bubbles-left { justify-content: flex-start; }
-.pyramid-q-bubbles-right { justify-content: flex-end; }
 
 .pyramid-q-bubble {
     background-color: #fff;
@@ -771,17 +762,11 @@ textarea:focus {
     flex-shrink: 0; /* Prevent shrinking */
 }
 
-/* Remove old positioning rules for the single container */
-/* .pyramid-level.basic-needs .pyramid-q-bubbles { ... } */
-/* .pyramid-level.individual .pyramid-q-bubbles { ... } */
-/* .pyramid-level.teamwork .pyramid-q-bubbles { ... } */
-/* .pyramid-level.growth .pyramid-q-bubbles { ... } */
-
-/* Optional: Adjust padding on specific levels if needed */
-.pyramid-level.basic-needs .pyramid-q-bubbles-container { padding: 0 10%; }
-.pyramid-level.individual .pyramid-q-bubbles-container { padding: 0 8%; }
-.pyramid-level.teamwork .pyramid-q-bubbles-container { padding: 0 12%; }
-.pyramid-level.growth .pyramid-q-bubbles-container { padding: 0 15%; }
+/* Adjust bubble positioning for specific levels for even spacing */
+.pyramid-level.basic-needs .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 15%; } /* Wider spacing for 2 bubbles */
+.pyramid-level.individual .pyramid-q-bubbles { justify-content: space-between; padding: 0 12%; } /* Adjust padding for 4 bubbles */
+.pyramid-level.teamwork .pyramid-q-bubbles { justify-content: space-between; padding: 0 18%; } /* Adjust padding for 4 bubbles */
+.pyramid-level.growth .pyramid-q-bubbles { justify-content: space-evenly; padding: 0 25%; } /* Wider spacing for 2 bubbles */
 
 /* Comparison Table Styles */
 .comparison-table {
