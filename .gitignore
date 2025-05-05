@@ -11,3 +11,4 @@ local_dev.db
 .DS_Store
 Thumbs.db
 .vercel
+node_modules

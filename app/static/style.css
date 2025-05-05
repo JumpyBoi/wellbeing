@@ -1080,3 +1080,170 @@ body.thank-you-page {
 .thank-you-button:hover {
     background-color: #008a9e; /* Darker Pop Blue */
 }
+
+/* --- Responsive Styles --- */
+
+/* Medium screens (Tablets) */
+@media (max-width: 992px) {
+    .dashboard-container {
+        max-width: 95%; /* Allow slightly more width */
+        margin: 1em auto;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Stack grid items */
+        /* Reset grid positions if they cause issues */
+        .engagement-index, .overall-score, .category-pyramid, .question-list, .custom-q1, .custom-q2 {
+            grid-column: auto;
+            grid-row: auto;
+        }
+    }
+
+    .indicator-cards-section {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjust min size */
+    }
+}
+
+/* Small screens (Mobiles) */
+@media (max-width: 767px) {
+    body {
+        padding: 1em; /* Reduce body padding */
+    }
+
+    .dashboard-container {
+        max-width: 100%;
+        margin: 0.5em auto;
+        padding: 0.5em; /* Reduce container padding */
+    }
+
+    .dashboard-header {
+        flex-direction: column; /* Stack header items */
+        align-items: flex-start; /* Align items to the start */
+        padding: 0.8em;
+        gap: 0.8em; /* Add gap between stacked items */
+    }
+    .header-text {
+        order: 1; /* Ensure title comes after logo */
+    }
+    .header-logo {
+        order: 0;
+        height: 35px;
+        margin-right: 0; /* Remove right margin */
+    }
+    .header-controls {
+        order: 2;
+        width: 100%; /* Make controls take full width */
+        justify-content: flex-start; /* Align controls to start */
+    }
+    .header-title {
+        font-size: 1.4em;
+    }
+
+    .dashboard-tabs {
+        margin-bottom: 1em;
+    }
+    .tab-button {
+        padding: 0.6em 1em;
+        font-size: 0.9em;
+    }
+
+    .dashboard-grid {
+        gap: 1em; /* Reduce gap between cards */
+    }
+
+    .dashboard-card {
+        padding: 1em; /* Reduce card padding */
+    }
+    .dashboard-card h3 {
+        font-size: 1em;
+        margin-bottom: 0.8em;
+    }
+
+    .question-list-header {
+        padding: 0.8rem 1rem 0.5rem 1rem; /* Adjust padding */
+    }
+    .question-list-content {
+        padding: 0.8rem 1rem 1rem 1rem; /* Adjust padding */
+    }
+    .question-row {
+        flex-wrap: wrap; /* Allow wrapping within a row if needed */
+    }
+    .question-id-col {
+        width: 2.5rem;
+        margin-right: 0.8rem;
+    }
+    .question-score-col {
+        margin-left: 0.8rem;
+        min-width: 50px;
+    }
+    .question-text {
+        font-size: 1em; /* Adjust font size */
+    }
+    .question-description {
+        font-size: 0.85em;
+    }
+    .score-value {
+        font-size: 0.9em;
+    }
+    .respondents-count {
+        font-size: 0.75em;
+    }
+
+    .pyramid-level {
+        padding: 1.5em 1em 1em 1em; /* Adjust padding */
+        min-height: 65px; /* Adjust height */
+    }
+    .pyramid-q-bubble {
+        width: 25px;
+        height: 25px;
+        font-size: 0.7em;
+    }
+    /* Adjust bubble spacing for smaller size */
+    .pyramid-level.basic-needs .pyramid-q-bubbles { padding: 0 10%; }
+    .pyramid-level.individual .pyramid-q-bubbles { padding: 0 8%; }
+    .pyramid-level.teamwork .pyramid-q-bubbles { padding: 0 12%; }
+    .pyramid-level.growth .pyramid-q-bubbles { padding: 0 20%; }
+
+
+    .indicator-cards-section {
+        grid-template-columns: 1fr; /* Stack indicators */
+        gap: 0.8em;
+    }
+    .indicator-card {
+        padding: 0.8em;
+    }
+    .indicator-score {
+        font-size: 1.6em;
+    }
+
+    .chart-container {
+        height: 300px; /* Reduce chart height */
+    }
+
+    /* Survey specific adjustments */
+    .survey-container {
+        max-width: 100%;
+        padding: 0 1em; /* Add padding for survey on mobile */
+    }
+    .options-container {
+        flex-wrap: wrap; /* Allow options to wrap */
+        gap: 0.8em;
+    }
+    .option-label {
+        min-width: 80px; /* Reduce min-width */
+        padding: 1em 0.5em;
+    }
+    .option-emoji {
+        font-size: 2em;
+    }
+    .question-text { /* Survey question text */
+        font-size: 1.3em;
+    }
+    .navigation-buttons {
+        flex-direction: column; /* Stack buttons */
+        gap: 0.5em;
+    }
+    .nav-button {
+        width: 100%; /* Make buttons full width */
+    }
+}
